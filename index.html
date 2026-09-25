@@ -668,7 +668,7 @@ function vProgress(){
   const last7 = Object.keys(S.days).filter(k => (now - parseD(k))/864e5 < 7);
   const sl = last7.filter(k=>S.days[k].sleep); const avgS = sl.length ? sl.reduce((a,k)=>a+S.days[k].sleep,0)/sl.length : null;
   const pr = last7.filter(k=>S.days[k].protein!=null); const prY = pr.filter(k=>S.days[k].protein).length;
-  const recent = S.sessions.slice(-6).reverse();
+  const recent = S.sessions.map((s,idx)=>({s,idx})).reverse().slice(0, ui.allSess ? 1e9 : 6);
   return `<div class="col g20">
     <h1>Прогресс</h1>
     ${H.length ? `<div class="col g10">${H.map(h => `<div class="hint">${ic(h.t==='ok'?'check':h.t==='warn'?'bulb':'bulb', h.t==='ok'?'acc':h.t==='warn'?'warn':'muted')}<div>${h.m}</div></div>`).join('')}</div>` : ''}
@@ -687,7 +687,8 @@ function vProgress(){
       <div class="stat"><div class="small muted">Сон, 7 дней</div><div class="v num">${avgS?kg(avgS.toFixed(1)):'—'}<small> ч</small></div><div class="small ${avgS&&avgS<7?'warn':'muted'}">${avgS?(avgS<7?'маловато':'хорошо'):'нет отметок'}</div></div>
       <div class="stat"><div class="small muted">Белок, 7 дней</div><div class="v num">${pr.length?prY:'—'}<small>${pr.length?' из '+pr.length:''}</small></div><div class="small muted">дней в норме</div></div>
     </div>
-    ${recent.length ? `<div class="card col g4"><h2 style="margin-bottom:6px">Последние тренировки</h2>${recent.map(s=>`<div class="exrow"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} · День ${s.dayIdx+1}</div><div class="small muted">${DAYS[s.dayIdx].name}</div></div><div class="small muted num">${s.minutes} мин · ${s.exercises.reduce((a,e)=>a+e.sets.length,0)} подх.</div></div>`).join('')}</div>` : ''}
+    ${recent.length ? `<div class="card col g4"><h2 style="margin-bottom:2px">Последние тренировки</h2><div class="small muted" style="margin-bottom:6px">Нажми, чтобы посмотреть или удалить.</div>${recent.map(({s,idx})=>`<button class="exrow" data-a="sess" data-v="${idx}"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} · День ${s.dayIdx+1}</div><div class="small muted">${DAYS[s.dayIdx].name}</div></div><div class="small muted num">${s.minutes} мин · ${s.exercises.reduce((a,e)=>a+e.sets.length,0)} подх.</div>${ic('right','muted')}</button>`).join('')}
+      ${S.sessions.length > 6 ? `<button class="link" data-a="allsess" style="align-self:flex-start">${ui.allSess ? 'Свернуть' : `Показать все (${S.sessions.length})`}</button>` : ''}</div>` : ''}
     <div class="col g10"><h2>Отправить Claude на разбор</h2>
       <div class="small muted">Раз в неделю: скопируй и вставь в чат проекта, или сохрани файл и прикрепи скрепкой.</div>
       <button class="btn sec" data-a="copy">${ic('copy')}Скопировать для Claude</button>
@@ -721,11 +722,15 @@ function sheetHTML(){
   if (sh.type === 'list'){ const A = S.active;
     body = `<div class="col g10"><h2>Упражнения</h2>${A.items.map((it,k) => { const d = it.sets.filter(x=>x.done).length; return `<button class="li ${k===A.i?'on':''}" data-a="jump" data-v="${k}"><div class="grow"><div style="font-weight:600">${EX[it.key].n}</div><div class="prog">${d}/${it.sets.length} подходов${it.ss?' · суперсет':''}</div></div>${d===it.sets.length?`<span class="ok">${ic('check')}</span>`:''}</button>`; }).join('')}
       <button class="btn sec" data-a="finish" style="margin-top:6px">Завершить тренировку</button>
-      <button class="link" data-a="cancelwo" style="color:var(--bad);align-self:center">Отменить без сохранения</button></div>`; }
+      <button class="btn ghost" data-a="cancelwo" style="color:var(--bad);border-color:#4a2a26">Отменить тренировку без сохранения</button></div>`; }
   if (sh.type === 'swap'){ const A = S.active; const it = A.items[A.i]; const orig = it.orig || it.key; const opts = [orig, ...altsFor(orig)].filter(k => k !== it.key);
     body = `<div class="col g10"><h2>Чем заменить?</h2><div class="small muted">Сейчас: ${EX[it.key].n}. У каждого варианта свои веса и своя история.</div>
       ${opts.map(k => `<button class="li" data-a="doswap" data-v="${k}"><div class="thumb"><img src="img/${EX[k].img}_0.jpg" alt=""></div><div class="grow"><div style="font-weight:600">${EX[k].n}</div><div class="prog">${k===orig?'исходное упражнение':EX[k].m?'тренажёр / блок':'свободный вес'}</div></div></button>`).join('')}
       <button class="chip ${ui.swapRemember?'on':''}" data-a="swaprem" style="font-size:15px">${ui.swapRemember?'✓ ':''}Запомнить замену для следующих тренировок</button></div>`; }
+  if (sh.type === 'sess'){ const s = S.sessions[sh.idx]; if (s) body = `<div class="col g12"><h2>${fmtDate(s.date)} · День ${s.dayIdx+1}</h2><div class="small muted">${DAYS[s.dayIdx].name} · ${s.minutes} мин · неделя ${s.week}</div>
+      <div class="card col g4" style="padding:6px 14px">${s.exercises.map(e=>`<div class="exrow"><div class="grow"><div style="font-weight:600">${EX[e.key]?.n||e.key}</div><div class="small muted num">${e.sets.map(x=>`${kg(x.w)}×${x.r}`).join(', ')}</div></div></div>`).join('')}</div>
+      <button class="btn ghost" data-a="delsess" data-v="${sh.idx}" style="color:var(--bad);border-color:#4a2a26">Удалить эту тренировку</button>
+      <div class="small muted">Удалится только эта тренировка. Отметки дня (вес, сон, белок) останутся.</div></div>`; }
   if (sh.type === 'pickday') body = `<div class="col g10"><h2>Какой день делаем?</h2>${DAYS.map((d,k)=>`<button class="li" data-a="start" data-v="${k}"><div class="grow"><div style="font-weight:600">День ${k+1}</div><div class="prog">${d.name}</div></div>${ic('right')}</button>`).join('')}</div>`;
   if (sh.type === 'exinfo'){ const ex = EX[sh.key]; body = `<div class="col g12"><h2>${ex.n}</h2><div class="imgbox"><img src="img/${ex.img}_0.jpg" alt="${ex.n}, начало"><img class="b" src="img/${ex.img}_1.jpg" alt="${ex.n}, конец"></div><div class="cue">${ex.c}</div>${sh.orig && sh.orig!==sh.key ? `<div class="small muted">Это замена для «${EX[sh.orig].n}».</div><button class="btn ghost" data-a="unswap" data-v="${sh.orig}">Вернуть исходное упражнение</button>` : ''}
     ${sh.orig ? (() => { const opts = [sh.orig, ...altsFor(sh.orig)].filter(k => k !== sh.key); return opts.length ? `<h2 style="margin-top:6px;font-size:16px">Заменить в программе на:</h2>${opts.map(k => `<button class="li" data-a="progswap" data-v="${k}" data-o="${sh.orig}"><div class="thumb"><img src="img/${EX[k].img}_0.jpg" alt=""></div><div class="grow"><div style="font-weight:600">${EX[k].n}</div><div class="prog">${k===sh.orig?'исходное упражнение':EX[k].m?'тренажёр / блок':'свободный вес'}</div></div></button>`).join('')}` : ''; })() : ''}<div class="small muted">Картинки: открытая база free-exercise-db.</div></div>`; }
@@ -795,6 +800,9 @@ document.addEventListener('click', e => {
     case 'savefinish': saveMarks(); S.sessions.push(ui.summary.session); S.active = null; save(); ui.summary=null; toast('Сохранено. Отличная работа!'); go('home'); break;
     case 'daymarks': ui.finishMarks = {bw:lastBW(), ...(S.days[today()]||{})}; ui.sheet={type:'marks'}; render(); break;
     case 'savemarks': saveMarks(); ui.sheet=null; toast('Отметки сохранены'); render(); break;
+    case 'sess': ui.sheet={type:'sess', idx:+v}; render(); break;
+    case 'allsess': ui.allSess = !ui.allSess; render(); break;
+    case 'delsess': { const s = S.sessions[+v]; if (s && confirm(`Удалить тренировку ${fmtDate(s.date)} (День ${s.dayIdx+1})? Это нельзя отменить.`)){ S.sessions.splice(+v,1); save(); ui.sheet=null; render(); toast('Тренировка удалена'); } break; }
     case 'pex': ui.progEx = v; render(); break;
     case 'copy': copyForClaude(); break;
     case 'file': saveFile(); break;
