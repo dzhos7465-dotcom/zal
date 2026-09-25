@@ -170,7 +170,48 @@ const EX = {
   calf_seat:{n:'Подъёмы на носки сидя',img:'Seated_Calf_Raise',rest:60,step:5,c:'Колени под валиком. Полная амплитуда: глубокая растяжка внизу, пауза, вверх до конца.'},
   db_ohp:{n:'Жим гантелей сидя',img:'Seated_Dumbbell_Press',rest:120,step:2,c:'Спинка почти вертикально. Гантели опускаются до уровня ушей, локти чуть впереди. Жми вверх, не сводя до стука. Вес — одной гантели.'},
   bb_ohp:{n:'Жим штанги стоя',img:'Standing_Military_Press',rest:150,step:2.5,c:'Ягодицы и пресс напряжены, без прогиба в пояснице. Штанга от верха груди строго вверх, голова уходит под гриф.'},
+  // ---- тренажёры и блоки (m:true) ----
+  m_chest:{n:'Жим от груди в тренажёре',img:'Leverage_Chest_Press',rest:120,step:5,m:true,c:'Рукояти на уровне середины груди. Лопатки прижаты к спинке. Жми вперёд, не выпрямляя локти до щелчка, назад — до лёгкой растяжки груди.'},
+  smith_bench:{n:'Жим лёжа в Смите',img:'Smith_Machine_Bench_Press',rest:150,step:2.5,m:true,c:'Скамья так, чтобы гриф опускался к низу груди. Лопатки сведены, локти под 45°. Вес — только блины, без грифа (или впиши как считаешь сам, но всегда одинаково).'},
+  m_incline:{n:'Жим на наклоне в тренажёре',img:'Leverage_Incline_Chest_Press',rest:120,step:5,m:true,c:'Рукояти на уровне верха груди. Спина прижата, жми вверх-вперёд, опускай подконтрольно.'},
+  smith_incline:{n:'Жим на наклонной в Смите',img:'Smith_Machine_Incline_Bench_Press',rest:150,step:2.5,m:true,c:'Скамья 30°, гриф опускается к верху груди. Лопатки сведены, ягодицы на скамье.'},
+  butterfly:{n:'Бабочка (сведения в тренажёре)',img:'Butterfly',rest:90,step:2.5,m:true,c:'Локти чуть согнуты и не меняют угол. Своди руки перед грудью, пауза, назад — до растяжки грудных.'},
+  dip_machine:{n:'Брусья в тренажёре',img:'Dip_Machine',rest:120,step:5,m:true,c:'Сядь, спина прижата. Дави рукояти вниз до полного выпрямления рук, локти вдоль корпуса.'},
+  m_tri:{n:'Разгибания в тренажёре на трицепс',img:'Machine_Triceps_Extension',rest:90,step:2.5,m:true,c:'Локти на подушке, плечи не двигаются. Разгибай руки полностью, возвращай медленно.'},
+  cable_wrist:{n:'Сгибания запястий на блоке',img:'Cable_Wrist_Curl',rest:60,step:2.5,m:true,c:'Предплечья на скамье или бёдрах, ладони вверх. Работают только запястья, амплитуда полная.'},
+  m_row:{n:'Тяга в рычажном тренажёре',img:'Leverage_Iso_Row',rest:120,step:5,m:true,c:'Грудь прижата к упору. Тяни рукояти к поясу, своди лопатки, локти назад.'},
+  tbar:{n:'Т-тяга с упором грудью',img:'Lying_T-Bar_Row',rest:150,step:2.5,m:true,c:'Грудь на подушке, спина не участвует. Тяни к животу, своди лопатки, внизу полная растяжка.'},
+  m_high_row:{n:'Тяга сверху в рычажном тренажёре',img:'Leverage_High_Row',rest:120,step:5,m:true,c:'Тяни рукояти вниз-назад к груди, локти идут назад, лопатки сводятся.'},
+  m_curl:{n:'Сгибания в тренажёре на бицепс',img:'Machine_Bicep_Curl',rest:90,step:2.5,m:true,c:'Локти на подушке, ось тренажёра на уровне локтя. Сгибай до пика, опускай медленно.'},
+  m_preacher:{n:'Скамья Скотта в тренажёре',img:'Machine_Preacher_Curls',rest:90,step:2.5,m:true,c:'Подмышки плотно на подушке. Внизу почти прямые руки, без удара весом.'},
+  cable_hammer:{n:'Молотки на блоке с канатом',img:'Cable_Hammer_Curls_-_Rope_Attachment',rest:90,step:2.5,m:true,c:'Нижний блок, канат нейтральным хватом. Локти у корпуса, сгибай до плеч.'},
+  m_rear:{n:'Обратная бабочка',img:'Reverse_Machine_Flyes',rest:90,step:2.5,m:true,c:'Грудью к спинке. Разводи руки назад почти прямыми, работает задняя дельта. Без рывков.'},
+  smith_squat:{n:'Приседания в Смите',img:'Smith_Machine_Squat',rest:150,step:2.5,m:true,c:'Стопы чуть впереди грифа. Садись до параллели и ниже, спина прямая, колени по линии носков.'},
+  seated_curl:{n:'Сгибания ног сидя',img:'Seated_Leg_Curl',rest:90,step:2.5,m:true,c:'Ось тренажёра на уровне колена. Сгибай до конца, пауза, возвращай медленно.'},
+  lying_curl:{n:'Сгибания ног лёжа',img:'Lying_Leg_Curls',rest:90,step:2.5,m:true,c:'Таз прижат к скамье. Сгибай ноги к ягодицам, опускай за 2-3 секунды.'},
+  smith_rdl:{n:'Румынская тяга в Смите',img:'Smith_Machine_Stiff-Legged_Deadlift',rest:150,step:2.5,m:true,c:'Колени слегка согнуты, таз назад, гриф скользит вдоль ног. Спина прямая, растяжка задней поверхности бедра.'},
+  leg_ext:{n:'Разгибания ног',img:'Leg_Extensions',rest:90,step:2.5,m:true,c:'Спина прижата, ось на уровне колена. Разгибай полностью, пауза вверху, опускай медленно.'},
+  calf_press:{n:'Икры в тренажёре для жима ногами',img:'Calf_Press_On_The_Leg_Press_Machine',rest:60,step:5,m:true,c:'Носки на краю платформы, колени почти прямые. Полная амплитуда с паузой внизу.'},
+  m_ohp:{n:'Жим вверх в тренажёре',img:'Machine_Shoulder_Military_Press',rest:120,step:5,m:true,c:'Рукояти на уровне плеч. Жми вверх, не прогибаясь в пояснице, опускай до уровня ушей.'},
+  smith_ohp:{n:'Жим сидя в Смите',img:'Smith_Machine_Overhead_Shoulder_Press',rest:150,step:2.5,m:true,c:'Скамья с вертикальной спинкой. Гриф опускается до подбородка, жми строго вверх.'},
 };
+// Замены: свободные веса ↔ тренажёры и блоки
+const ALT = {
+  bench:['m_chest','smith_bench','db_bench'], db_bench:['m_chest','smith_bench','bench'],
+  incline_db:['m_incline','smith_incline','incline_bb','butterfly'], incline_bb:['m_incline','smith_incline','incline_db','butterfly'],
+  dips:['dip_machine','m_tri','butterfly'], lat_raise:['cable_lat'], cable_lat:['lat_raise'],
+  pushdown:['oh_tri','m_tri'], oh_tri:['pushdown','m_tri'],
+  wrist_curl:['cable_wrist'], wrist_ext:[],
+  pullup:['pulldown','cg_pulldown','m_high_row'], pulldown:['pullup','cg_pulldown','m_high_row'], cg_pulldown:['pulldown','pullup','m_high_row'],
+  bb_row:['m_row','tbar','cable_row','db_row'], db_row:['m_row','cable_row','tbar'], cable_row:['m_row','m_high_row','db_row'],
+  bb_curl:['m_curl','m_preacher','incline_curl'], incline_curl:['m_preacher','m_curl','bb_curl'], hammer:['cable_hammer'],
+  face_pull:['m_rear','rear_fly'], rear_fly:['m_rear','face_pull'],
+  squat:['hack','smith_squat','leg_press'], rdl:['smith_rdl','lying_curl','seated_curl'],
+  leg_press:['hack','leg_ext','smith_squat'], hack:['leg_press','smith_squat','leg_ext'],
+  calf:['calf_press','calf_seat'], calf_seat:['calf_press','calf'],
+  db_ohp:['m_ohp','smith_ohp','bb_ohp'], bb_ohp:['m_ohp','smith_ohp','db_ohp'],
+};
+function altsFor(orig){ const set = new Set(ALT[orig] || []); (ALT[orig]||[]).forEach(k => (ALT[k]||[]).forEach(x => set.add(x))); set.delete(orig); return [...set].filter(k => EX[k]); }
 // Дни: [ключ вариант А, ключ вариант Б, подходы, повторы от, до, суперсет]
 const DAYS = [
   {name:'Грудь + трицепс', items:[
@@ -269,7 +310,8 @@ const blockName = b => b ? 'Б' : 'А';
 function nextDayIdx(){ const last = S.sessions[S.sessions.length-1]; return last ? (last.dayIdx + 1) % DAYS.length : 0; }
 function dayPlan(dayIdx, wk){
   const b = blockOf(wk);
-  return DAYS[dayIdx].items.map(t => ({key: b ? t[1] : t[0], sets: wk <= 2 ? Math.min(t[2], 3) : t[2], lo:t[3], hi:t[4], ss:t[5] || null}));
+  S.swaps = S.swaps || {};
+  return DAYS[dayIdx].items.map(t => { const orig = b ? t[1] : t[0]; return {orig, key: S.swaps[orig] || orig, sets: wk <= 2 ? Math.min(t[2], 3) : t[2], lo:t[3], hi:t[4], ss:t[5] || null}; });
 }
 function lastFor(key, beforeIdx){
   const arr = S.sessions; const end = beforeIdx ?? arr.length;
@@ -560,14 +602,14 @@ function vWorkout(){
     <div class="row g12" style="align-items:flex-start">
       <div class="col g6 grow"><div class="exname">${ex.n}</div>
         <div class="s14 muted">Вариант ${blockName(A.block)} · ${it.sets.length} × ${it.lo}-${it.hi} · отдых ${restStr}</div>
-        ${partner ? `<div><span class="badge acc">Суперсет с: ${partner}</span></div>` : ''}</div>
+        ${partner ? `<div><span class="badge acc">Суперсет с: ${partner}</span></div>` : ''}${ex.m ? '<div><span class="badge">тренажёр</span></div>' : ''}</div>
       <button class="icbtn" style="width:52px;height:52px;border:1px solid var(--line)" data-a="img" aria-label="Показать технику">${ic('img')}</button>
     </div>
     ${ui.showImg ? `<div class="imgbox"><img src="img/${ex.img}_0.jpg" alt="${ex.n}, начало"><img class="b" src="img/${ex.img}_1.jpg" alt="${ex.n}, конец"></div><div class="cue">${ex.c}</div>` : ''}
     ${it.up ? `<div class="hint" style="padding:10px 14px">${ic('up','acc')}<div class="s14">В прошлый раз все повторы сделаны — вес поднят на ${kg(ex.step)} кг.</div></div>` : ''}
     ${it.last ? `<div class="s14 muted">Прошлый раз: ${it.last}</div>` : `<div class="s14 muted">Первый раз — впиши рабочий вес, нажав на цифру.</div>`}
     <div class="col g8">${rows}</div>
-    <div class="row g16" style="justify-content:center"><button class="link" data-a="addset">+ подход</button>${it.sets.length>1?'<button class="link" data-a="delset">− подход</button>':''}<button class="link" data-a="skipex">пропустить</button></div>
+    <div class="row g16" style="justify-content:center"><button class="link" data-a="addset">+ подход</button>${it.sets.length>1?'<button class="link" data-a="delset">− подход</button>':''}<button class="link" data-a="swap">заменить</button><button class="link" data-a="skipex">пропустить</button></div>
     <div class="col g10" style="margin-top:auto">
       ${done ? `<button class="btn big" data-a="finish">${ic('check')}Завершить тренировку</button>`
         : A.s >= it.sets.length ? `<button class="btn big" data-a="jump" data-v="${nextIdx}">Следующее упражнение${ic('right')}</button>`
@@ -661,7 +703,7 @@ function vProgram(){
     ${wk<=2?'<div class="hint">'+ic('bulb','warn')+'<div class="s15">Недели 1-2 — втягивание после перерыва: по 3 подхода, 3-4 повтора в запасе. С 3-й недели — полный объём, 1-2 повтора в запасе.</div></div>':''}
     ${DAYS.map((d,di) => { const plan = dayPlan(di, wk); return `<div class="card col g6">
       <div class="row g10"><h2 class="grow">День ${di+1} · ${d.name}</h2></div>
-      <div class="col">${plan.map(x => `<button class="exrow" data-a="exinfo" data-v="${x.key}"><div class="thumb"><img src="img/${EX[x.key].img}_0.jpg" alt="" loading="lazy"></div><div class="grow"><div style="font-weight:600">${EX[x.key].n}</div><div class="small muted">${x.sets} × ${x.lo}-${x.hi} · отдых ${mmss(EX[x.key].rest)}${x.ss?' · суперсет':''}</div></div></button>`).join('')}</div>
+      <div class="col">${plan.map(x => `<button class="exrow" data-a="exinfo" data-v="${x.key}" data-o="${x.orig}"><div class="thumb"><img src="img/${EX[x.key].img}_0.jpg" alt="" loading="lazy"></div><div class="grow"><div style="font-weight:600">${EX[x.key].n}</div><div class="small muted">${x.sets} × ${x.lo}-${x.hi} · отдых ${mmss(EX[x.key].rest)}${x.ss?' · суперсет':''}${x.orig!==x.key?' · <span class="acc">замена</span>':EX[x.key].m?' · тренажёр':''}</div></div></button>`).join('')}</div>
       ${S.active?'':`<button class="link" data-a="start" data-v="${di}" style="align-self:flex-start">Начать этот день →</button>`}
     </div>`; }).join('')}
     <div class="card col g8"><h2>Правила</h2><div class="soft s15" style="line-height:1.5">
@@ -680,8 +722,12 @@ function sheetHTML(){
     body = `<div class="col g10"><h2>Упражнения</h2>${A.items.map((it,k) => { const d = it.sets.filter(x=>x.done).length; return `<button class="li ${k===A.i?'on':''}" data-a="jump" data-v="${k}"><div class="grow"><div style="font-weight:600">${EX[it.key].n}</div><div class="prog">${d}/${it.sets.length} подходов${it.ss?' · суперсет':''}</div></div>${d===it.sets.length?`<span class="ok">${ic('check')}</span>`:''}</button>`; }).join('')}
       <button class="btn sec" data-a="finish" style="margin-top:6px">Завершить тренировку</button>
       <button class="link" data-a="cancelwo" style="color:var(--bad);align-self:center">Отменить без сохранения</button></div>`; }
+  if (sh.type === 'swap'){ const A = S.active; const it = A.items[A.i]; const orig = it.orig || it.key; const opts = [orig, ...altsFor(orig)].filter(k => k !== it.key);
+    body = `<div class="col g10"><h2>Чем заменить?</h2><div class="small muted">Сейчас: ${EX[it.key].n}. У каждого варианта свои веса и своя история.</div>
+      ${opts.map(k => `<button class="li" data-a="doswap" data-v="${k}"><div class="thumb"><img src="img/${EX[k].img}_0.jpg" alt=""></div><div class="grow"><div style="font-weight:600">${EX[k].n}</div><div class="prog">${k===orig?'исходное упражнение':EX[k].m?'тренажёр / блок':'свободный вес'}</div></div></button>`).join('')}
+      <button class="chip ${ui.swapRemember?'on':''}" data-a="swaprem" style="font-size:15px">${ui.swapRemember?'✓ ':''}Запомнить замену для следующих тренировок</button></div>`; }
   if (sh.type === 'pickday') body = `<div class="col g10"><h2>Какой день делаем?</h2>${DAYS.map((d,k)=>`<button class="li" data-a="start" data-v="${k}"><div class="grow"><div style="font-weight:600">День ${k+1}</div><div class="prog">${d.name}</div></div>${ic('right')}</button>`).join('')}</div>`;
-  if (sh.type === 'exinfo'){ const ex = EX[sh.key]; body = `<div class="col g12"><h2>${ex.n}</h2><div class="imgbox"><img src="img/${ex.img}_0.jpg" alt="${ex.n}, начало"><img class="b" src="img/${ex.img}_1.jpg" alt="${ex.n}, конец"></div><div class="cue">${ex.c}</div><div class="small muted">Картинки: открытая база free-exercise-db.</div></div>`; }
+  if (sh.type === 'exinfo'){ const ex = EX[sh.key]; body = `<div class="col g12"><h2>${ex.n}</h2><div class="imgbox"><img src="img/${ex.img}_0.jpg" alt="${ex.n}, начало"><img class="b" src="img/${ex.img}_1.jpg" alt="${ex.n}, конец"></div><div class="cue">${ex.c}</div>${sh.orig && sh.orig!==sh.key ? `<div class="small muted">Это замена для «${EX[sh.orig].n}».</div><button class="btn ghost" data-a="unswap" data-v="${sh.orig}">Вернуть исходное упражнение</button>` : ''}<div class="small muted">Картинки: открытая база free-exercise-db.</div></div>`; }
   if (sh.type === 'marks'){ body = `<div class="col g16"><h2>Отметки дня · ${fmtDate(today())}</h2>${marksForm(ui.finishMarks, true)}<button class="btn" data-a="savemarks">Сохранить</button></div>`; }
   if (sh.type === 'text') body = `<div class="col g10"><h2>Скопируй текст</h2><div class="small muted">Выдели всё и скопируй, затем вставь в чат проекта.</div><textarea class="inp" style="height:50dvh;padding:12px;font-size:13px" readonly>${esc(sh.text)}</textarea></div>`;
   return `<div class="sheet" data-a="closesheet"><div data-stop="1">${body}</div></div>`;
@@ -713,7 +759,17 @@ document.addEventListener('click', e => {
     case 'psex': case 'pgoal': { const f = $('#pform'); f[a==='psex'?'sex':'goal'].value = v; t.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c===t)); if (a==='pgoal') $('#gw').style.display = v==='cut'?'':'none'; break; }
     case 'start': if (S.active) { toast('Сначала заверши текущую тренировку'); break; } ui.sheet=null; startWorkout(+v); break;
     case 'pickday': ui.sheet={type:'pickday'}; render(); break;
-    case 'exinfo': ui.sheet={type:'exinfo', key:v}; render(); break;
+    case 'exinfo': ui.sheet={type:'exinfo', key:v, orig:t.dataset.o}; render(); break;
+    case 'swap': readInputs(); save(); ui.swapRemember=false; ui.sheet={type:'swap'}; render(); break;
+    case 'swaprem': ui.swapRemember=!ui.swapRemember; render(); break;
+    case 'doswap': { const it = A.items[A.i]; const orig = it.orig || it.key; const doneSets = it.sets.filter(x=>x.done).length;
+      const n = Math.max(it.sets.length, 1); const f = prefill({key:v, sets:n, lo:it.lo, hi:it.hi});
+      if (doneSets){ A.items.splice(A.i+1, 0, {...it, key:v, orig, rest:EX[v].rest, up:f.up, last:f.last, sets:f.sets.slice(0, n-doneSets)}); it.sets = it.sets.filter(x=>x.done); A.i += 1; }
+      else Object.assign(it, {key:v, orig, rest:EX[v].rest, up:f.up, last:f.last, sets:f.sets});
+      A.s = A.items[A.i].sets.findIndex(x=>!x.done); if (A.s < 0) A.s = 0;
+      S.swaps = S.swaps || {}; if (ui.swapRemember){ if (v===orig) delete S.swaps[orig]; else S.swaps[orig] = v; }
+      ui.sheet=null; ui.showImg=false; save(); render(); toast(ui.swapRemember ? 'Заменено и запомнено' : 'Заменено на эту тренировку'); break; }
+    case 'unswap': if (S.swaps) delete S.swaps[v]; save(); ui.sheet=null; render(); toast('Возвращено исходное упражнение'); break;
     case 'closesheet': ui.sheet=null; render(); break;
     case 'leave': go('home'); break;
     case 'img': ui.showImg = !ui.showImg; readInputs(); save(); render(); break;
