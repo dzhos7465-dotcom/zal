@@ -699,7 +699,7 @@ function vProgress(){
 function vProgram(){
   const wk = weekNo(), b = blockOf(wk);
   return `<div class="col g20">
-    <div class="col g6"><h1>Программа</h1><div class="soft s15">Неделя ${wk} · вариант ${blockName(b)}. Каждые 4 недели меняются часть упражнений, базовые остаются.</div></div>
+    <div class="col g6"><h1>Программа</h1><div class="soft s15">Неделя ${wk} · вариант ${blockName(b)}. Каждые 4 недели меняются часть упражнений, базовые остаются. Нажми на упражнение, чтобы увидеть технику или заменить его на тренажёр.</div></div>
     ${wk<=2?'<div class="hint">'+ic('bulb','warn')+'<div class="s15">Недели 1-2 — втягивание после перерыва: по 3 подхода, 3-4 повтора в запасе. С 3-й недели — полный объём, 1-2 повтора в запасе.</div></div>':''}
     ${DAYS.map((d,di) => { const plan = dayPlan(di, wk); return `<div class="card col g6">
       <div class="row g10"><h2 class="grow">День ${di+1} · ${d.name}</h2></div>
@@ -727,7 +727,8 @@ function sheetHTML(){
       ${opts.map(k => `<button class="li" data-a="doswap" data-v="${k}"><div class="thumb"><img src="img/${EX[k].img}_0.jpg" alt=""></div><div class="grow"><div style="font-weight:600">${EX[k].n}</div><div class="prog">${k===orig?'исходное упражнение':EX[k].m?'тренажёр / блок':'свободный вес'}</div></div></button>`).join('')}
       <button class="chip ${ui.swapRemember?'on':''}" data-a="swaprem" style="font-size:15px">${ui.swapRemember?'✓ ':''}Запомнить замену для следующих тренировок</button></div>`; }
   if (sh.type === 'pickday') body = `<div class="col g10"><h2>Какой день делаем?</h2>${DAYS.map((d,k)=>`<button class="li" data-a="start" data-v="${k}"><div class="grow"><div style="font-weight:600">День ${k+1}</div><div class="prog">${d.name}</div></div>${ic('right')}</button>`).join('')}</div>`;
-  if (sh.type === 'exinfo'){ const ex = EX[sh.key]; body = `<div class="col g12"><h2>${ex.n}</h2><div class="imgbox"><img src="img/${ex.img}_0.jpg" alt="${ex.n}, начало"><img class="b" src="img/${ex.img}_1.jpg" alt="${ex.n}, конец"></div><div class="cue">${ex.c}</div>${sh.orig && sh.orig!==sh.key ? `<div class="small muted">Это замена для «${EX[sh.orig].n}».</div><button class="btn ghost" data-a="unswap" data-v="${sh.orig}">Вернуть исходное упражнение</button>` : ''}<div class="small muted">Картинки: открытая база free-exercise-db.</div></div>`; }
+  if (sh.type === 'exinfo'){ const ex = EX[sh.key]; body = `<div class="col g12"><h2>${ex.n}</h2><div class="imgbox"><img src="img/${ex.img}_0.jpg" alt="${ex.n}, начало"><img class="b" src="img/${ex.img}_1.jpg" alt="${ex.n}, конец"></div><div class="cue">${ex.c}</div>${sh.orig && sh.orig!==sh.key ? `<div class="small muted">Это замена для «${EX[sh.orig].n}».</div><button class="btn ghost" data-a="unswap" data-v="${sh.orig}">Вернуть исходное упражнение</button>` : ''}
+    ${sh.orig ? (() => { const opts = [sh.orig, ...altsFor(sh.orig)].filter(k => k !== sh.key); return opts.length ? `<h2 style="margin-top:6px;font-size:16px">Заменить в программе на:</h2>${opts.map(k => `<button class="li" data-a="progswap" data-v="${k}" data-o="${sh.orig}"><div class="thumb"><img src="img/${EX[k].img}_0.jpg" alt=""></div><div class="grow"><div style="font-weight:600">${EX[k].n}</div><div class="prog">${k===sh.orig?'исходное упражнение':EX[k].m?'тренажёр / блок':'свободный вес'}</div></div></button>`).join('')}` : ''; })() : ''}<div class="small muted">Картинки: открытая база free-exercise-db.</div></div>`; }
   if (sh.type === 'marks'){ body = `<div class="col g16"><h2>Отметки дня · ${fmtDate(today())}</h2>${marksForm(ui.finishMarks, true)}<button class="btn" data-a="savemarks">Сохранить</button></div>`; }
   if (sh.type === 'text') body = `<div class="col g10"><h2>Скопируй текст</h2><div class="small muted">Выдели всё и скопируй, затем вставь в чат проекта.</div><textarea class="inp" style="height:50dvh;padding:12px;font-size:13px" readonly>${esc(sh.text)}</textarea></div>`;
   return `<div class="sheet" data-a="closesheet"><div data-stop="1">${body}</div></div>`;
@@ -769,6 +770,7 @@ document.addEventListener('click', e => {
       A.s = A.items[A.i].sets.findIndex(x=>!x.done); if (A.s < 0) A.s = 0;
       S.swaps = S.swaps || {}; if (ui.swapRemember){ if (v===orig) delete S.swaps[orig]; else S.swaps[orig] = v; }
       ui.sheet=null; ui.showImg=false; save(); render(); toast(ui.swapRemember ? 'Заменено и запомнено' : 'Заменено на эту тренировку'); break; }
+    case 'progswap': S.swaps = S.swaps || {}; if (v === t.dataset.o) delete S.swaps[v]; else S.swaps[t.dataset.o] = v; save(); ui.sheet=null; render(); toast('Программа обновлена'); break;
     case 'unswap': if (S.swaps) delete S.swaps[v]; save(); ui.sheet=null; render(); toast('Возвращено исходное упражнение'); break;
     case 'closesheet': ui.sheet=null; render(); break;
     case 'leave': go('home'); break;
