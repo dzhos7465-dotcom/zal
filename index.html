@@ -407,7 +407,7 @@ function startWorkout(dayIdx){
   S.active = {dayIdx, week:wk, block:blockOf(wk), startedAt:Date.now(), items, i:0, s:0, restEnd:null, restTotal:0};
   save(); unlockAudio(); keepAwake(); ui.showImg=false; go('workout');
 }
-function group(A, i){ const ss = A.items[i].ss; if (!ss) return [i]; const g=[]; A.items.forEach((it,k)=>{ if (it.ss===ss && Math.abs(k-i)<=3) g.push(k); }); return g; }
+function group(A, i){ const ss = A.items[i].ss; if (!ss || S.profile?.noSS) return [i]; const g=[]; A.items.forEach((it,k)=>{ if (it.ss===ss && Math.abs(k-i)<=3) g.push(k); }); return g; }
 function findNext(A, i, s){
   const g = group(A, i); const pos = g.indexOf(i);
   for (let k = pos+1; k < g.length; k++){ const it = A.items[g[k]]; if (it.sets[s] && !it.sets[s].done) return {i:g[k], s, rest:false}; }
@@ -422,7 +422,9 @@ function completeSet(){
   st.done = true; st.at = Date.now();
   const nx = findNext(A, A.i, A.s);
   if (nx){
-    if (nx.rest){ const g = group(A, A.i); const r = Math.max(...g.map(k => A.items[k].rest)); A.restTotal = r; A.restEnd = Date.now() + r*1000; restBeeped = false; A.restCount = (A.restCount||0) + 1; }
+    if (nx.rest){ const g = group(A, A.i); const r = Math.max(...g.map(k => A.items[k].rest)); A.restTotal = r; A.restEnd = Date.now() + r*1000; restBeeped = false; A.transition = false; A.restCount = (A.restCount||0) + 1; }
+    else if (nx.i !== A.i){ A.restTotal = 15; A.restEnd = Date.now() + 15000; restBeeped = false; A.transition = true;
+      toast(`Суперсет → ${EX[A.items[nx.i].key].n}. Большой отдых — после пары`); }
     if (nx.i !== A.i) ui.showImg = false;
     A.i = nx.i; A.s = nx.s;
   } else { A.s = it.sets.length; A.restEnd = null; }
@@ -476,15 +478,16 @@ function tick(){
   const left = A.restEnd ? (A.restEnd - Date.now())/1000 : 0;
   if (A.restEnd && left <= 0){
     A.restEnd = null; save();
-    if (!restBeeped){ restBeeped = true; beep(); box.classList.add('flash'); setTimeout(()=>box.classList.remove('flash'), 1600); }
+    if (!restBeeped){ restBeeped = true; if (A.transition) { tick3(); setTimeout(tick3, 250); } else beep(); box.classList.add('flash'); setTimeout(()=>box.classList.remove('flash'), 1600); }
   }
   const resting = A.restEnd && left > 0;
   if (resting){ const sec = Math.ceil(left); if (sec <= 3 && sec >= 1 && lastTick !== sec){ lastTick = sec; tick3(); } } else lastTick = null;
   $('#restT').textContent = resting ? mmss(Math.ceil(left)) : 'Пора!';
   $('#restT').style.color = resting ? 'var(--text)' : 'var(--acc)';
-  $('#restL').textContent = resting ? 'Отдых' : 'Можно начинать подход';
+  $('#restL').textContent = resting ? (A.transition ? 'Переход в суперсете' : 'Отдых') : 'Можно начинать подход';
   $('#restL').style.color = resting ? 'var(--muted)' : 'var(--acc)';
-  const rt = $('#rTip'); if (rt){ if (resting){ const c = tipCtx({rest: A.restTotal}); const pool = pickPool(TIPS_REST, c); const tp = pool[((A.restCount||0) + (ui.tipShift||0)) % pool.length]; const key = TIPS_REST.indexOf(tp);
+  const rt = $('#rTip'); if (rt && resting && A.transition){ if (rt.dataset.k !== 'ss'){ rt.dataset.k = 'ss'; rt.innerHTML = `${ic('bulb','acc')}<div><div class="tt">Суперсет: два упражнения подряд почти без отдыха, полный отдых — после пары. Так тренировка короче, а результат тот же.</div><div class="ts">обзор Krzysztofik, 2019 · отключить можно в настройках</div></div>`; } rt.style.display='flex'; }
+  else if (rt){ if (resting){ const c = tipCtx({rest: A.restTotal}); const pool = pickPool(TIPS_REST, c); const tp = pool[((A.restCount||0) + (ui.tipShift||0)) % pool.length]; const key = TIPS_REST.indexOf(tp);
       if (rt.dataset.k !== String(key)){ rt.dataset.k = key; rt.innerHTML = tipHTML(tp, c); } rt.style.display = 'flex'; } else { rt.style.display = 'none'; rt.dataset.k = ''; } }
   $('#restBar').style.width = resting ? Math.max(0, Math.min(100, left / A.restTotal * 100)) + '%' : '0%';
 }
@@ -619,6 +622,8 @@ function vOnboard(edit){
       <button class="btn" type="submit">${edit ? 'Сохранить' : 'Начать'}</button>
     </form>
     ${edit ? `<div class="col g10">
+      <h2 style="margin-top:8px">Тренировка</h2>
+      <button class="li" data-a="togss"><div class="grow"><div style="font-weight:600">Суперсеты</div><div class="prog">${p.noSS ? 'Выключены: все упражнения по очереди, с отдыхом после каждого подхода' : 'Включены: пары упражнений подряд, отдых после пары'}</div></div><span class="badge ${p.noSS?'':'acc'}">${p.noSS?'Выкл':'Вкл'}</span></button>
       <h2 style="margin-top:8px">Данные</h2>
       <button class="btn sec" data-a="copy">${ic('copy')}Скопировать для Claude</button>
       <button class="btn sec" data-a="file">${ic('down')}Сохранить файл-копию</button>
@@ -942,6 +947,7 @@ document.addEventListener('click', e => {
     case 'ccancel': if (confirm('Отменить кардио без сохранения?')){ S.cardioActive = null; save(); go('home'); } break;
     case 'tipnext': ui.tipShift = (ui.tipShift||0) + 1; tick(); break;
     case 'cimg': ui.cImg = !ui.cImg; render(); break;
+    case 'togss': S.profile.noSS = !S.profile.noSS; save(); render(); toast(S.profile.noSS ? 'Суперсеты выключены' : 'Суперсеты включены'); break;
     case 'pex': ui.progEx = v; render(); break;
     case 'copy': copyForClaude(); break;
     case 'file': saveFile(); break;
