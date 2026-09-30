@@ -55,7 +55,7 @@ h2{margin:0;font-family:var(--disp);font-size:18px;font-weight:700}
 .chips{display:grid;gap:8px}
 .chip{height:52px;border-radius:14px;background:var(--card);font-size:17px;font-weight:600}
 .chip.on{background:var(--acc);color:var(--on-acc);font-weight:700}
-.link{color:var(--acc);font-weight:600;font-size:15px;padding:8px 0}
+.link{color:var(--acc);font-weight:600;font-size:15px;padding:8px 0;white-space:nowrap}
 svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 
 /* nav */
@@ -125,6 +125,10 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .tabs::-webkit-scrollbar{display:none}
 .tab{height:40px;padding:0 14px;border-radius:12px;background:var(--card);font-size:14px;font-weight:600;white-space:nowrap;color:var(--soft)}
 .tab.on{background:var(--acc);color:var(--on-acc)}
+.tip{border-radius:16px;background:rgba(200,240,75,.08);border:1px solid rgba(200,240,75,.22);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;transition:opacity .35s}
+.tip .tt{font-size:15px;line-height:1.4;color:var(--text)}
+.tip .ts{font-size:12px;color:var(--muted);margin-top:4px}
+.tip.fade{opacity:0}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);transform:translateX(-50%);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;z-index:40;max-width:90vw;text-align:center}
 .exrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--card2);width:100%;text-align:left}
 .exrow:last-child{border-bottom:0}
@@ -262,6 +266,55 @@ const CARDIO = {
   ellip:{n:'Эллипс',img:'Elliptical_Trainer',c:'Держи корпус прямо, толкай педали всей стопой. Мягкая нагрузка на суставы.'},
   run:{n:'Бег на дорожке',img:'Walking_Treadmill',c:'Лёгкий бег, короткий шаг, приземление под себя. Не делай перед днём ног.'},
 };
+/* ---- Советы (научно обоснованные) ----
+   ctx: {age, bw, goal, min, rest, m} */
+const hrZone = age => { const mx = 208 - 0.7*age; return [Math.round(mx*0.64/5)*5, Math.round(mx*0.76/5)*5]; };
+const TIPS_CARDIO = [
+  {ph:'warm', t:()=>'Первые 3-5 минут — разминка: начни спокойно и плавно разгоняйся. Сердцу и суставам нужно время.', s:'рекомендации ACSM'},
+  {ph:'cool', t:()=>'Последние 2-3 минуты сбавляй темп постепенно, не останавливайся резко — так меньше головокружения.', s:'рекомендации ACSM'},
+  {t:c=>{ const [a,b]=hrZone(c.age); return `Твоя зона умеренного кардио — примерно ${a}-${b} ударов в минуту. Без пульсометра: говорить можешь, петь — нет.`; }, s:'формула Tanaka, 2001'},
+  {t:()=>'Тест разговора: можешь сказать предложение целиком — темп правильный. Задыхаешься — сбавь.', s:'обзор Reed & Pipe, 2014'},
+  {t:()=>'Пей воду маленькими глотками. Для кардио до часа обычной воды достаточно, спортивные напитки не нужны.', s:'рекомендации ACSM'},
+  {t:()=>'Вечернее кардио не портит сон, если закончить хотя бы за час до сна.', s:'метаанализ Stutz, 2019'},
+  {t:()=>'ВОЗ советует для здоровья 150 минут умеренной активности в неделю. Считается всё: зал, быстрая ходьба, лестницы.', s:'ВОЗ, 2020'},
+  {t:()=>'Кардио натощак не сжигает за сутки больше жира, чем после еды. Делай, когда удобно.', s:'Schoenfeld, 2014; обзор Hackett, 2017'},
+  {g:['bulk','fit'], t:()=>'Умеренное кардио не мешает росту мышц и силы, если его не слишком много.', s:'метаанализ Schumann, 2022'},
+  {g:['bulk'], t:()=>'Велотренажёр меньше мешает росту ног, чем бег: меньше ударной нагрузки.', s:'метаанализ Wilson, 2012'},
+  {g:['bulk'], t:c=>`${c.min} минут такого кардио — это примерно ${Math.round(5*c.bw*c.min/60/10)*10} ккал. На наборе восполни: банан и стакан молока.`, s:'расчёт по MET'},
+  {g:['bulk','fit'], t:()=>'Кардио лучше не ставить перед днём ног: уставшие ноги — меньше веса в приседаниях.', s:'метаанализ Wilson, 2012'},
+  {g:['cut'], t:()=>'Кардио помогает, но вес уходит в основном за счёт питания. Без дефицита калорий одно кардио даёт мало.', s:'позиция ACSM, Donnelly, 2009'},
+  {g:['cut'], t:()=>'Интервалы и ровный темп сжигают жир одинаково. Интервалы просто экономят время.', s:'метаанализ Wewege, 2017'},
+  {g:['cut','fit'], t:()=>'7-10 тысяч шагов в день связаны с лучшим здоровьем и добавляют расход вне зала.', s:'метаанализ Paluch, 2022'},
+  {m:['walk'], t:()=>'Не держись за поручни: нагрузка и расход калорий заметно падают. Руки свободно двигаются.', s:'техника'},
+  {m:['walk'], t:()=>'Ходьба с наклоном хорошо нагружает ноги и сердце, а удар о дорожку примерно вдвое меньше, чем при беге.', s:'биомеханика ходьбы и бега'},
+  {m:['bike'], t:()=>'В нижней точке колено чуть согнуто, примерно на 25-35°. Слишком низкое седло перегружает колени.', s:'обзор Bini, 2011'},
+  {m:['ellip'], t:()=>'Не опирайся на ручки всем весом и не сутулься — пусть работают ноги.', s:'техника'},
+  {m:['run'], t:()=>'Короткий частый шаг, приземление под себя — так нагрузка на колени меньше.', s:'Heiderscheit, 2011'},
+];
+const TIPS_REST = [
+  {cond:c=>c.rest>=120, t:()=>'Отдых 2-3 минуты в базовых даёт больше роста, чем минута. Не торопись начинать.', s:'метаанализ Singer, 2024'},
+  {t:()=>'Последние 1-2 повтора должны быть тяжёлыми: близость к отказу — главный сигнал для роста.', s:'метаанализ Robinson, 2024'},
+  {t:()=>'Опускай вес под контролем, но сверхмедленно не нужно: от 0,5 до 8 секунд на повтор дают одинаковый рост.', s:'метаанализ Schoenfeld, 2015'},
+  {t:()=>'Растянутое положение мышцы даёт больше роста. Не срезай нижнюю часть движения.', s:'метаанализ Wolf, 2023'},
+  {t:()=>'Выдыхай на усилии и не задерживай дыхание надолго — давление резко растёт.', s:'рекомендации ACSM'},
+  {t:c=>`Белок лучше делить на 4 приёма примерно по ${Math.round(c.bw*0.4/5)*5} г, чем съесть всё за раз.`, s:'Schoenfeld & Aragon, 2018'},
+  {t:()=>'Спешить есть сразу после зала не нужно: «белковое окно» — это несколько часов.', s:'метаанализ Schoenfeld, 2013'},
+  {t:()=>'Креатин 3-5 г в день вместе с силовыми даёт больше мышечной массы, чем силовые без него.', s:'метаанализ Burke, 2023'},
+  {cond:c=>c.rest<120, t:()=>'На изолирующих думай о работающей мышце — это усиливает её рост.', s:'Schoenfeld, 2018'},
+  {t:()=>'10-20 подходов на мышцу в неделю — зона лучшего роста. Программа уже в ней.', s:'метаанализ Schoenfeld, 2017'},
+  {t:()=>'Мотивирующая музыка немного повышает работоспособность и снижает ощущение усталости.', s:'метаанализ Terry, 2020'},
+  {t:()=>'Недосып снижает силу и мешает восстановлению. Если ночь короткая, дневной сон помогает добрать.', s:'метаанализ Craven, 2022'},
+];
+function tipCtx(extra){ const p = S.profile || {}; return {age:p.age||30, bw:lastBW(), goal:p.goal||'bulk', ...extra}; }
+function pickPool(list, c){ return list.filter(x => (!x.g || x.g.includes(c.goal)) && (!x.m || x.m.includes(c.m)) && (!x.cond || x.cond(c))); }
+function tipHTML(tp, c){ return `${ic('bulb','acc')}<div><div class="tt">${tp.t(c)}</div><div class="ts">${tp.s}</div></div>`; }
+function cardioTip(C, el){
+  const c = tipCtx({m:C.type, min:C.target}); const left = C.target*60 - el; const pool = pickPool(TIPS_CARDIO, c);
+  if (el < 180) return pool.find(x=>x.ph==='warm');
+  if (left > 0 && left < 150) return pool.find(x=>x.ph==='cool');
+  const mid = pool.filter(x=>!x.ph); const seed = (C.startedAt/1000|0) % mid.length;
+  return mid[(seed + Math.floor((el-180)/45) + (ui.tipShift||0)) % mid.length];
+}
 const GOALS = {bulk:'Набор массы', cut:'Похудение', fit:'Форма и здоровье'};
 const MAIN_LIFTS = ['bench','squat','bb_row','pullup','db_ohp','rdl','incline_db','bb_ohp'];
 
@@ -369,7 +422,7 @@ function completeSet(){
   st.done = true; st.at = Date.now();
   const nx = findNext(A, A.i, A.s);
   if (nx){
-    if (nx.rest){ const g = group(A, A.i); const r = Math.max(...g.map(k => A.items[k].rest)); A.restTotal = r; A.restEnd = Date.now() + r*1000; restBeeped = false; }
+    if (nx.rest){ const g = group(A, A.i); const r = Math.max(...g.map(k => A.items[k].rest)); A.restTotal = r; A.restEnd = Date.now() + r*1000; restBeeped = false; A.restCount = (A.restCount||0) + 1; }
     if (nx.i !== A.i) ui.showImg = false;
     A.i = nx.i; A.s = nx.s;
   } else { A.s = it.sets.length; A.restEnd = null; }
@@ -407,6 +460,9 @@ document.addEventListener('pointerdown', () => { if (actx && actx.state === 'sus
 function tickCardio(){
   const C = S.cardioActive; if (!C) return; const el = (Date.now() - C.startedAt)/1000, left = C.target*60 - el;
   const t = $('#cT'); if (!t) return; t.textContent = mmss(el);
+  const tipEl = $('#cTip'); if (tipEl){ const tp = cardioTip(C, el); const key = tp ? TIPS_CARDIO.indexOf(tp) : -1;
+    if (tipEl.dataset.k !== String(key)){ const first = !tipEl.dataset.k; tipEl.dataset.k = key; const put = () => { tipEl.innerHTML = tp ? tipHTML(tp, tipCtx({m:C.type, min:C.target})) : ''; tipEl.classList.remove('fade'); };
+      if (first) put(); else { tipEl.classList.add('fade'); setTimeout(put, 350); } } }
   $('#cBar').style.width = Math.min(100, el/60/C.target*100) + '%';
   if (left > 0){ $('#cLeft').textContent = 'осталось ' + mmss(left); if (left <= 3.2 && left > 0 && lastTick !== Math.ceil(left)){ lastTick = Math.ceil(left); tick3(); } }
   else { $('#cLeft').textContent = 'цель выполнена, можно продолжать или завершить'; $('#cL').textContent = 'Цель выполнена'; $('#cL').style.color = 'var(--acc)'; t.style.color = 'var(--acc)';
@@ -428,6 +484,8 @@ function tick(){
   $('#restT').style.color = resting ? 'var(--text)' : 'var(--acc)';
   $('#restL').textContent = resting ? 'Отдых' : 'Можно начинать подход';
   $('#restL').style.color = resting ? 'var(--muted)' : 'var(--acc)';
+  const rt = $('#rTip'); if (rt){ if (resting){ const c = tipCtx({rest: A.restTotal}); const pool = pickPool(TIPS_REST, c); const tp = pool[((A.restCount||0) + (ui.tipShift||0)) % pool.length]; const key = TIPS_REST.indexOf(tp);
+      if (rt.dataset.k !== String(key)){ rt.dataset.k = key; rt.innerHTML = tipHTML(tp, c); } rt.style.display = 'flex'; } else { rt.style.display = 'none'; rt.dataset.k = ''; } }
   $('#restBar').style.width = resting ? Math.max(0, Math.min(100, left / A.restTotal * 100)) + '%' : '0%';
 }
 setInterval(tick, 250);
@@ -636,6 +694,7 @@ function vWorkout(){
         <button class="rb" data-a="restskip" aria-label="Пропустить отдых">${ic('skip')}</button>
       </div>
       <div class="bar"><div id="restBar" style="width:0%"></div></div>
+      <button class="tip" id="rTip" data-a="tipnext" style="display:none;background:transparent;border-color:var(--card2)" aria-label="Следующий совет"></button>
     </div>
     <div class="row g12" style="align-items:flex-start">
       <div class="col g6 grow"><div class="exname">${ex.n}</div>
@@ -647,7 +706,7 @@ function vWorkout(){
     ${it.up ? `<div class="hint" style="padding:10px 14px">${ic('up','acc')}<div class="s14">В прошлый раз все повторы сделаны — вес поднят на ${kg(ex.step)} кг.</div></div>` : ''}
     ${it.last ? `<div class="s14 muted">Прошлый раз: ${it.last}</div>` : `<div class="s14 muted">Первый раз — впиши рабочий вес, нажав на цифру.</div>`}
     <div class="col g8">${rows}</div>
-    <div class="row g16" style="justify-content:center"><button class="link" data-a="addset">+ подход</button>${it.sets.length>1?'<button class="link" data-a="delset">− подход</button>':''}<button class="link" data-a="swap">заменить</button><button class="link" data-a="skipex">пропустить</button></div>
+    <div class="row" style="justify-content:space-between;gap:6px;white-space:nowrap"><button class="link" data-a="addset">+ подход</button>${it.sets.length>1?'<button class="link" data-a="delset">− подход</button>':''}<button class="link" data-a="swap">заменить</button><button class="link" data-a="skipex">пропустить</button></div>
     <div class="col g10" style="margin-top:auto">
       ${done ? `<button class="btn big" data-a="finish">${ic('check')}Завершить тренировку</button>`
         : A.s >= it.sets.length ? `<button class="btn big" data-a="jump" data-v="${nextIdx}">Следующее упражнение${ic('right')}</button>`
@@ -714,8 +773,9 @@ function vCardio(){
       <div class="bar" style="width:100%"><div id="cBar" style="width:${Math.min(100, el/60/C.target*100)}%"></div></div>
       <div class="small muted" id="cLeft"></div>
     </div>
-    <div class="imgbox"><img src="img/${c.img}_0.jpg" alt="${c.n}"><img class="b" src="img/${c.img}_1.jpg" alt=""></div>
-    <div class="cue">${c.c}</div>
+    <button class="tip" id="cTip" data-a="tipnext" aria-label="Следующий совет"></button>
+    <button class="btn ghost" data-a="cimg">${ic('img')}${ui.cImg ? 'Скрыть технику' : 'Показать технику'}</button>
+    ${ui.cImg ? `<div class="imgbox"><img src="img/${c.img}_0.jpg" alt="${c.n}"><img class="b" src="img/${c.img}_1.jpg" alt=""></div><div class="cue">${c.c}</div>` : ''}
     <div class="col g10" style="margin-top:auto">
       <button class="btn big" data-a="cfinish">${ic('check')}Завершить кардио</button>
       <button class="link" data-a="ccancel" style="color:var(--bad);align-self:center">Отменить без сохранения</button>
@@ -880,6 +940,8 @@ document.addEventListener('click', e => {
     case 'cstart': if (S.active){ toast('Сначала заверши силовую тренировку'); break; } unlockAudio(); S.cardioActive = {type: ui.cardioPick || 'walk', target: ui.cardioTarget || (S.profile.goal==='cut'?40:25), startedAt: Date.now()}; save(); keepAwake(); lastTick=null; ui.sheet=null; render(); break;
     case 'cfinish': { const C = S.cardioActive; const min = Math.max(1, Math.round((Date.now()-C.startedAt)/60000)); const d = {...(S.days[today()]||{})}; d.cardio = (d.cardio||0) + min; d.cardioType = C.type; S.days[today()] = d; S.cardioActive = null; save(); try { wakeLock && wakeLock.release(); } catch(e){} toast(`Кардио ${min} мин сохранено`); go('home'); break; }
     case 'ccancel': if (confirm('Отменить кардио без сохранения?')){ S.cardioActive = null; save(); go('home'); } break;
+    case 'tipnext': ui.tipShift = (ui.tipShift||0) + 1; tick(); break;
+    case 'cimg': ui.cImg = !ui.cImg; render(); break;
     case 'pex': ui.progEx = v; render(); break;
     case 'copy': copyForClaude(); break;
     case 'file': saveFile(); break;
