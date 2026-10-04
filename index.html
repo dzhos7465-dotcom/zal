@@ -198,77 +198,131 @@ const EX = {
   calf_press:{n:'Икры в тренажёре для жима ногами',img:'Calf_Press_On_The_Leg_Press_Machine',rest:60,step:5,m:true,c:'Носки на краю платформы, колени почти прямые. Полная амплитуда с паузой внизу.'},
   m_ohp:{n:'Жим вверх в тренажёре',img:'Machine_Shoulder_Military_Press',rest:120,step:5,m:true,c:'Рукояти на уровне плеч. Жми вверх, не прогибаясь в пояснице, опускай до уровня ушей.'},
   smith_ohp:{n:'Жим сидя в Смите',img:'Smith_Machine_Overhead_Shoulder_Press',rest:150,step:2.5,m:true,c:'Скамья с вертикальной спинкой. Гриф опускается до подбородка, жми строго вверх.'},
+  // ---- добавлены для замен ----
+  cable_fly_low:{n:'Сведения на блоке снизу вверх',img:'Low_Cable_Crossover',rest:90,step:2.5,m:true,c:'Рукояти нижних блоков. Своди руки снизу вверх перед собой до уровня подбородка, локти чуть согнуты. Хорошо нагружает верх груди.'},
+  cable_fly_high:{n:'Кроссовер сверху вниз',img:'Cable_Crossover',rest:90,step:2.5,m:true,c:'Рукояти верхних блоков, шаг вперёд, корпус чуть наклонён. Своди руки вниз-вперёд к низу живота. Нижняя часть груди.'},
+  cg_bench:{n:'Жим лёжа узким хватом',img:'Close-Grip_Barbell_Bench_Press',rest:120,step:2.5,c:'Хват на ширине плеч, локти вдоль корпуса. Опускай к низу груди. Все головки трицепса, тяжёлое базовое движение.'},
+  skull:{n:'Французский жим (EZ-гриф)',img:'EZ-Bar_Skullcrusher',rest:90,step:2.5,c:'Лёжа, плечи чуть наклонены за голову и не двигаются. Опускай гриф ко лбу или за голову, разгибай только в локтях. Длинная головка.'},
+  preacher:{n:'Подъём на скамье Скотта',img:'Preacher_Curl',rest:90,step:2.5,c:'Подмышки плотно на подушке. Внизу почти прямые руки, без удара. Поднимай до пика и опускай за 2-3 секунды.'},
+  straight_pd:{n:'Пулловер на блоке (прямые руки)',img:'Straight-Arm_Pulldown',rest:90,step:2.5,m:true,c:'Верхний блок, прямая рукоять. Руки почти прямые, тяни рукоять дугой к бёдрам. Чувствуй широчайшие, а не трицепс.'},
+  hip_thrust:{n:'Ягодичный мостик со штангой',img:'Barbell_Hip_Thrust',rest:120,step:5,c:'Лопатки на скамье, штанга на тазе (подложи валик). Поднимай таз до прямой линии корпуса, пауза 1 с вверху. Подбородок к груди.'},
+  lunges:{n:'Выпады с гантелями',img:'Dumbbell_Lunges',rest:120,step:2,c:'Широкий шаг, заднее колено почти касается пола. Корпус прямо, толкайся пяткой передней ноги. Вес — одной гантели.'},
+  reverse_curl:{n:'Обратный подъём штанги',img:'Reverse_Barbell_Curl',rest:60,step:2.5,c:'Хват сверху. Локти у корпуса, поднимай как на бицепс. Работают разгибатели предплечья и плечелучевая.'},
 };
-// Замены: свободные веса ↔ тренажёры и блоки
-const ALT = {
-  bench:['m_chest','smith_bench','db_bench'], db_bench:['m_chest','smith_bench','bench'],
-  incline_db:['m_incline','smith_incline','incline_bb','butterfly'], incline_bb:['m_incline','smith_incline','incline_db','butterfly'],
-  dips:['dip_machine','m_tri','butterfly'], lat_raise:['cable_lat'], cable_lat:['lat_raise'],
-  pushdown:['oh_tri','m_tri'], oh_tri:['pushdown','m_tri'],
-  wrist_curl:['cable_wrist'], wrist_ext:[],
-  pullup:['pulldown','cg_pulldown','m_high_row'], pulldown:['pullup','cg_pulldown','m_high_row'], cg_pulldown:['pulldown','pullup','m_high_row'],
-  bb_row:['m_row','tbar','cable_row','db_row'], db_row:['m_row','cable_row','tbar'], cable_row:['m_row','m_high_row','db_row'],
-  bb_curl:['m_curl','m_preacher','incline_curl'], incline_curl:['m_preacher','m_curl','bb_curl'], hammer:['cable_hammer'],
-  face_pull:['m_rear','rear_fly'], rear_fly:['m_rear','face_pull'],
-  squat:['hack','smith_squat','leg_press'], rdl:['smith_rdl','lying_curl','seated_curl'],
-  leg_press:['hack','leg_ext','smith_squat'], hack:['leg_press','smith_squat','leg_ext'],
-  calf:['calf_press','calf_seat'], calf_seat:['calf_press','calf'],
-  db_ohp:['m_ohp','smith_ohp','bb_ohp'], bb_ohp:['m_ohp','smith_ohp','db_ohp'],
-};
-function altsFor(orig){ const set = new Set(ALT[orig] || []); (ALT[orig]||[]).forEach(k => (ALT[k]||[]).forEach(x => set.add(x))); set.delete(orig); return [...set].filter(k => EX[k]); }
-// Дни: [ключ вариант А, ключ вариант Б, подходы, повторы от, до, суперсет]
+['pulldown','cg_pulldown','cable_row','pushdown','oh_tri','face_pull','cable_lat','leg_press','hack'].forEach(k => EX[k].m = true); // блоки и тренажёры
+// Мышцы и их части: из этого строится список замен
+const MUSCLES = {chest:'Грудь', back:'Спина', shoulders:'Плечи', triceps:'Трицепс', biceps:'Бицепс', quads:'Квадрицепс', hams:'Задняя поверхность и ягодицы', calves:'Икры', forearms:'Предплечья'};
+const PARTS = [
+  ['chest','Верх груди',['incline_db','incline_bb','m_incline','smith_incline','cable_fly_low']],
+  ['chest','Середина груди',['bench','db_bench','m_chest','smith_bench','butterfly']],
+  ['chest','Низ груди',['dips','cable_fly_high']],
+  ['back','Вертикальная тяга (ширина)',['pullup','pulldown','cg_pulldown','m_high_row','straight_pd']],
+  ['back','Горизонтальная тяга (толщина)',['bb_row','db_row','cable_row','m_row','tbar']],
+  ['shoulders','Передняя дельта (жимы)',['db_ohp','bb_ohp','m_ohp','smith_ohp']],
+  ['shoulders','Средняя дельта',['lat_raise','cable_lat']],
+  ['shoulders','Задняя дельта',['face_pull','rear_fly','m_rear']],
+  ['triceps','Длинная головка (над головой)',['oh_tri','skull']],
+  ['triceps','Все головки',['pushdown','m_tri','dip_machine','cg_bench']],
+  ['biceps','Растяжка (наклонная скамья)',['incline_curl']],
+  ['biceps','Скамья Скотта',['preacher','m_preacher']],
+  ['biceps','Базовые',['bb_curl','m_curl']],
+  ['biceps','Плечевая мышца',['hammer','cable_hammer']],
+  ['quads','Приседы и жимы',['squat','hack','smith_squat','leg_press','lunges']],
+  ['quads','Изоляция',['leg_ext']],
+  ['hams','Тяги от таза',['rdl','smith_rdl','hip_thrust']],
+  ['hams','Сгибания ног',['seated_curl','lying_curl']],
+  ['calves','Икры',['calf','calf_seat','calf_press']],
+  ['forearms','Сгибатели',['wrist_curl','cable_wrist']],
+  ['forearms','Разгибатели',['wrist_ext','reverse_curl']],
+];
+const PART_OF = {}; PARTS.forEach(([mu,pn,ks],pi) => ks.forEach(k => PART_OF[k] = {mu, pn, pi}));
+const partLabel = k => { const p = PART_OF[k]; return p ? `${MUSCLES[p.mu]} · ${p.pn.toLowerCase()}` : ''; };
+// Все упражнения той же мышцы: сначала та же часть, потом остальные части
+function altGroups(orig){ const p = PART_OF[orig]; if (!p) return []; return PARTS.map((x,pi)=>({x,pi})).filter(({x}) => x[0]===p.mu).sort((a,b) => (a.pi===p.pi?-1:0) - (b.pi===p.pi?-1:0)).map(({x}) => ({name:x[1], keys:x[2].filter(k => EX[k])})); }
+function altsFor(orig){ return altGroups(orig).flatMap(g => g.keys).filter(k => k !== orig); }
+// Дни: [ключ вариант А, ключ вариант Б, подходы, повторы от, до]
+// Порядок: одна мышца полностью, потом следующая. Предплечья — в конце, чтобы хват не мешал тягам.
 const DAYS = [
   {name:'Грудь + трицепс', items:[
-    ['bench','bench',4,6,8],
+    ['bench','smith_bench',4,6,8],
     ['incline_db','incline_bb',3,8,10],
-    ['wrist_curl','wrist_curl',2,12,15,'f'],
-    ['wrist_ext','wrist_ext',2,12,15,'f'],
-    ['lat_raise','cable_lat',3,12,15,'s'],
-    ['pushdown','oh_tri',3,10,12,'s'],
-    ['dips','dips',3,8,12],
+    ['dips','cable_fly_high',3,8,12],
+    ['oh_tri','skull',3,10,12],
+    ['pushdown','m_tri',3,10,12],
+    ['wrist_curl','wrist_curl',2,12,15],
+    ['wrist_ext','reverse_curl',2,12,15],
   ]},
   {name:'Спина + бицепс', items:[
     ['pullup','pullup',4,6,10],
-    ['bb_row','bb_row',4,8,10],
+    ['bb_row','tbar',4,8,10],
     ['db_row','cg_pulldown',3,10,12],
-    ['bb_curl','incline_curl',3,8,12],
-    ['hammer','hammer',3,10,12],
     ['face_pull','rear_fly',3,12,15],
-    ['wrist_curl','wrist_curl',2,12,15,'f'],
-    ['wrist_ext','wrist_ext',2,12,15,'f'],
+    ['bb_curl','preacher',3,8,12],
+    ['incline_curl','hammer',3,10,12],
   ]},
   {name:'Ноги + плечи', items:[
     ['squat','squat',4,6,8],
-    ['rdl','rdl',3,8,10],
-    ['wrist_curl','wrist_curl',2,12,15,'f'],
-    ['wrist_ext','wrist_ext',2,12,15,'f'],
     ['leg_press','hack',3,10,12],
+    ['rdl','rdl',3,8,10],
     ['calf','calf_seat',3,12,15],
-    ['db_ohp','bb_ohp',4,8,10],
+    ['db_ohp','bb_ohp',3,8,10],
     ['lat_raise','cable_lat',3,12,15],
+    ['wrist_curl','cable_wrist',2,12,15],
+    ['wrist_ext','wrist_ext',2,12,15],
   ]},
-  {name:'Спина + плечи (лёгкий)', items:[
-    ['pullup','pulldown',3,6,10],
-    ['db_ohp','db_ohp',3,10,12],
-    ['cable_row','db_row',3,10,12],
-    ['wrist_curl','wrist_curl',2,12,15,'f'],
-    ['wrist_ext','wrist_ext',2,12,15,'f'],
-    ['lat_raise','cable_lat',3,12,15,'s'],
-    ['face_pull','face_pull',3,12,15,'s'],
-    ['db_bench','incline_db',3,10,12],
-    ['incline_curl','hammer',2,12,15,'t'],
-    ['pushdown','oh_tri',2,12,15,'t'],
+  {name:'Верх (грудь, спина, плечи, руки)', items:[
+    ['incline_db','m_incline',3,8,12],
+    ['cable_fly_low','butterfly',2,12,15],
+    ['pulldown','pullup',3,8,12],
+    ['cable_row','m_row',3,10,12],
+    ['lat_raise','cable_lat',3,12,15],
+    ['incline_curl','hammer',2,10,12],
+    ['oh_tri','pushdown',2,10,12],
+  ]},
+  {name:'Ноги (5-й день, по желанию)', extra:true, items:[
+    ['hack','smith_squat',3,8,12],
+    ['seated_curl','lying_curl',3,10,12],
+    ['hip_thrust','lunges',3,8,12],
+    ['leg_ext','leg_ext',2,12,15],
+    ['calf_seat','calf_press',3,12,15],
   ]},
 ];
+const MAIN_DAYS = DAYS.filter(d => !d.extra).length;
 const CARDIO = {
   walk:{n:'Ходьба на дорожке с наклоном',img:'Walking_Treadmill',c:'Наклон 6-12%, скорость 5-6 км/ч. Не держись за поручни — так работают ноги и сердце, а не руки. Щадит колени.'},
   bike:{n:'Велотренажёр',img:'Bicycling_Stationary',c:'Седло на уровне тазовой кости, внизу нога почти прямая. Ровный темп 70-90 оборотов в минуту.'},
   ellip:{n:'Эллипс',img:'Elliptical_Trainer',c:'Держи корпус прямо, толкай педали всей стопой. Мягкая нагрузка на суставы.'},
   run:{n:'Бег на дорожке',img:'Walking_Treadmill',c:'Лёгкий бег, короткий шаг, приземление под себя. Не делай перед днём ног.'},
 };
+// Режимы кардио для здоровья сердца. Пульс: максимум по Tanaka (208 − 0,7 × возраст)
+const CSET = {
+  walk:{warm:'5 км/ч, наклон 1-2%', mod:'5,5-6,5 км/ч, наклон 5-8%', hard:'6-6,5 км/ч, наклон 10-12% (быстро в гору) или лёгкий бег 8-9 км/ч без наклона', easy:'5 км/ч, наклон 2-3%', cool:'4-4,5 км/ч, без наклона'},
+  bike:{warm:'лёгкое сопротивление, 60-70 об/мин', mod:'среднее сопротивление, 70-90 об/мин', hard:'сопротивление заметно выше, 85-100 об/мин', easy:'лёгкое сопротивление, 60-70 об/мин', cool:'самое лёгкое, 50-60 об/мин'},
+  ellip:{warm:'лёгкая нагрузка, спокойный темп', mod:'средняя нагрузка, ровный темп, руками тоже работай', hard:'нагрузка выше, быстрый темп', easy:'лёгкая нагрузка, спокойный темп', cool:'самая лёгкая нагрузка, медленно'},
+  run:{warm:'быстрая ходьба 5-6 км/ч', mod:'лёгкий бег 7-8 км/ч', hard:'бег 9-11 км/ч', easy:'ходьба 5 км/ч', cool:'ходьба 4-5 км/ч'},
+};
+const CPH = { // доли максимального пульса и ощущение усилия (из 10)
+  warm:{n:'Разминка', lo:.50, hi:.60, rpe:'2-3 из 10: легко'},
+  mod:{n:'Основная часть', lo:.60, hi:.70, rpe:'4-5 из 10: говоришь предложениями, но не поёшь'},
+  hard:{n:'Быстро', lo:.80, hi:.88, rpe:'7-8 из 10: говоришь только отдельными словами'},
+  easy:{n:'Восстановление', lo:.50, hi:.65, rpe:'2-3 из 10: дыхание успокаивается'},
+  cool:{n:'Заминка', lo:.45, hi:.55, rpe:'2 из 10: очень легко'},
+};
+const hrMax = age => 208 - 0.7*age;
+const hrRange = (k, age) => { const mx = hrMax(age), z = CPH[k]; return [Math.round(mx*z.lo/5)*5, Math.round(mx*z.hi/5)*5]; };
+const CMODES = {
+  mod:{n:'Умеренное', d:'Для сердца и сосудов. Ровный темп 30-45 минут. Основа: 2 раза в неделю.', opts:[25,30,35,40,45], def:35, unit:'мин'},
+  int:{n:'Интервалы', d:'1 минута быстро, 2 минуты легко. Лучше всего повышает выносливость сердца. 1 раз в неделю.', opts:[4,6,8], def:6, unit:'повторов'},
+};
+function cardioPlan(mode, val){
+  if (mode === 'int'){ const ph = [{k:'warm',sec:300}]; for (let r=0;r<val;r++){ ph.push({k:'hard',sec:60,r:r+1}); ph.push({k:'easy',sec:120,r:r+1}); } ph.push({k:'cool',sec:300}); return ph; }
+  return [{k:'warm',sec:300},{k:'mod',sec:Math.max(5,val-8)*60},{k:'cool',sec:180}];
+}
+function phaseAt(C, el){ const ph = C.phases || [{k:'mod',sec:C.target*60}]; let acc = 0; for (let i=0;i<ph.length;i++){ if (el < acc + ph[i].sec) return {i, p:ph[i], left: acc + ph[i].sec - el, ph}; acc += ph[i].sec; } return {i:ph.length, p:null, left:0, ph}; }
+function cardioWeek(){ const now = parseD(today()); const ks = Object.keys(S.days).filter(k => (now - parseD(k))/864e5 < 7); return {min: ks.reduce((a,k)=>a+(S.days[k].cardio||0),0), int: ks.some(k => S.days[k].cardioMode==='int')}; }
 /* ---- Советы (научно обоснованные) ----
    ctx: {age, bw, goal, min, rest, m} */
-const hrZone = age => { const mx = 208 - 0.7*age; return [Math.round(mx*0.64/5)*5, Math.round(mx*0.76/5)*5]; };
+const hrZone = age => { const mx = 208 - 0.7*age; return [Math.round(mx*0.60/5)*5, Math.round(mx*0.70/5)*5]; };
 const TIPS_CARDIO = [
   {ph:'warm', t:()=>'Первые 3-5 минут — разминка: начни спокойно и плавно разгоняйся. Сердцу и суставам нужно время.', s:'рекомендации ACSM'},
   {ph:'cool', t:()=>'Последние 2-3 минуты сбавляй темп постепенно, не останавливайся резко — так меньше головокружения.', s:'рекомендации ACSM'},
@@ -369,11 +423,14 @@ function weekNo(dateStr){
 }
 const blockOf = wk => (Math.ceil(wk/4) - 1) % 2; // 0 = А (недели 1-4), 1 = Б (5-8)...
 const blockName = b => b ? 'Б' : 'А';
-function nextDayIdx(){ const last = S.sessions[S.sessions.length-1]; return last ? (last.dayIdx + 1) % DAYS.length : 0; }
+function nextDayIdx(){ // по кругу дни 1-4; 5-й (доп. ноги) выбирается вручную и круг не сбивает
+  for (let i = S.sessions.length-1; i >= 0; i--){ const d = S.sessions[i].dayIdx; if (d < MAIN_DAYS) return (d + 1) % MAIN_DAYS; }
+  return 0;
+}
 function dayPlan(dayIdx, wk){
   const b = blockOf(wk);
   S.swaps = S.swaps || {};
-  return DAYS[dayIdx].items.map(t => { const orig = b ? t[1] : t[0]; return {orig, key: S.swaps[orig] || orig, sets: wk <= 2 ? Math.min(t[2], 3) : t[2], lo:t[3], hi:t[4], ss:t[5] || null}; });
+  return DAYS[dayIdx].items.map(t => { const orig = b ? t[1] : t[0]; return {orig, key: S.swaps[orig] || orig, sets: wk <= 2 ? Math.min(t[2], 3) : t[2], lo:t[3], hi:t[4], ss:null}; });
 }
 function lastFor(key, beforeIdx){
   const arr = S.sessions; const end = beforeIdx ?? arr.length;
@@ -407,7 +464,7 @@ function startWorkout(dayIdx){
   S.active = {dayIdx, week:wk, block:blockOf(wk), startedAt:Date.now(), items, i:0, s:0, restEnd:null, restTotal:0};
   save(); unlockAudio(); keepAwake(); ui.showImg=false; go('workout');
 }
-function group(A, i){ const ss = A.items[i].ss; if (!ss || S.profile?.noSS) return [i]; const g=[]; A.items.forEach((it,k)=>{ if (it.ss===ss && Math.abs(k-i)<=3) g.push(k); }); return g; }
+function group(A, i){ return [i]; } // суперсеты убраны: мышца прорабатывается полностью, потом следующая
 function findNext(A, i, s){
   const g = group(A, i); const pos = g.indexOf(i);
   for (let k = pos+1; k < g.length; k++){ const it = A.items[g[k]]; if (it.sets[s] && !it.sets[s].done) return {i:g[k], s, rest:false}; }
@@ -462,12 +519,26 @@ document.addEventListener('pointerdown', () => { if (actx && actx.state === 'sus
 function tickCardio(){
   const C = S.cardioActive; if (!C) return; const el = (Date.now() - C.startedAt)/1000, left = C.target*60 - el;
   const t = $('#cT'); if (!t) return; t.textContent = mmss(el);
+  const cur = phaseAt(C, el), age = S.profile.age || 30;
+  if (cur.p){
+    $('#cPT').textContent = mmss(cur.left);
+    if ($('#cSet').dataset.i !== String(cur.i)){
+      const first = $('#cSet').dataset.i === undefined; $('#cSet').dataset.i = cur.i;
+      const k = cur.p.k, [a,b] = hrRange(k, age), set = (CSET[C.type]||CSET.walk)[k];
+      $('#cL').textContent = CPH[k].n + (cur.p.r ? ` · ${cur.p.r} из ${cur.ph.filter(x=>x.k==='hard').length}` : ''); $('#cL').style.color = k==='hard' ? 'var(--warn)' : 'var(--acc)';
+      $('#cSet').textContent = set; $('#cHr').textContent = `пульс ${a}-${b} · ${CPH[k].rpe}`; $('#cHr').style.color = k==='hard' ? 'var(--warn)' : 'var(--acc)';
+      const nx = cur.ph[cur.i+1]; $('#cNext').textContent = nx ? `Дальше: ${CPH[nx.k].n.toLowerCase()} — ${(CSET[C.type]||CSET.walk)[nx.k]}` : '';
+      if (!first && C.lastPh !== cur.i){ C.lastPh = cur.i; save(); tick3(); setTimeout(tick3, 220); setTimeout(tick3, 440); try { navigator.vibrate && navigator.vibrate([300,120,300]); } catch(e){} const bx = $('#crest'); bx.classList.add('flash'); setTimeout(()=>bx.classList.remove('flash'), 1400); }
+      else C.lastPh = cur.i;
+    }
+    if (cur.left <= 3.2 && cur.i < cur.ph.length-1 && lastTick !== Math.ceil(cur.left)){ lastTick = Math.ceil(cur.left); tick3(); }
+  }
   const tipEl = $('#cTip'); if (tipEl){ const tp = cardioTip(C, el); const key = tp ? TIPS_CARDIO.indexOf(tp) : -1;
     if (tipEl.dataset.k !== String(key)){ const first = !tipEl.dataset.k; tipEl.dataset.k = key; const put = () => { tipEl.innerHTML = tp ? tipHTML(tp, tipCtx({m:C.type, min:C.target})) : ''; tipEl.classList.remove('fade'); };
       if (first) put(); else { tipEl.classList.add('fade'); setTimeout(put, 350); } } }
   $('#cBar').style.width = Math.min(100, el/60/C.target*100) + '%';
-  if (left > 0){ $('#cLeft').textContent = 'осталось ' + mmss(left); if (left <= 3.2 && left > 0 && lastTick !== Math.ceil(left)){ lastTick = Math.ceil(left); tick3(); } }
-  else { $('#cLeft').textContent = 'цель выполнена, можно продолжать или завершить'; $('#cL').textContent = 'Цель выполнена'; $('#cL').style.color = 'var(--acc)'; t.style.color = 'var(--acc)';
+  if (left > 0){ $('#cLeft').textContent = 'осталось ' + mmss(left); if (!cur.p || cur.i === cur.ph.length-1){ if (left <= 3.2 && lastTick !== Math.ceil(left)){ lastTick = Math.ceil(left); tick3(); } } }
+  else { $('#cLeft').textContent = 'можно завершать'; $('#cL').textContent = 'Цель выполнена'; $('#cL').style.color = 'var(--acc)'; $('#cPT').textContent = mmss(el); $('#cPT').style.color = 'var(--acc)'; $('#cSet').textContent = 'Отличная работа. Нажми «Завершить кардио».'; $('#cHr').textContent = ''; $('#cNext').textContent = '';
     if (!C.beeped){ C.beeped = true; save(); beep(); const b = $('#crest'); b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'), 1600); } }
 }
 function tick(){
@@ -508,9 +579,14 @@ function targets(){
 /* ================= АНАЛИТИКА ================= */
 function bestByKey(key){ const out=[]; S.sessions.forEach(s => { const it = s.exercises.find(e => e.key===key); if (it && it.sets.length){ const best = Math.max(...it.sets.map(x => ev(key, x.w, x.r))); const top = it.sets.reduce((a,x)=> x.w>a.w || (x.w===a.w && x.r>a.r) ? x : a, it.sets[0]); out.push({date:s.date, v:best, top}); } }); return out; }
 function bwSeries(){ return Object.keys(S.days).sort().filter(k => S.days[k].bw).map(k => ({date:k, v:S.days[k].bw})); }
-function bwRate(){ // кг в неделю по последним ~3 неделям, линейная регрессия
+function bwWeeks(){ // средний вес по неделям (с понедельника) — дневные скачки ±1 кг сглаживаются
+  const m = {}; bwSeries().forEach(p => { const d = parseD(p.date); d.setDate(d.getDate() - ((d.getDay()+6)%7)); const k = dstr(d); (m[k] = m[k] || []).push(p.v); });
+  return Object.keys(m).sort().map(k => ({date:k, v: m[k].reduce((a,b)=>a+b,0)/m[k].length, n:m[k].length}));
+}
+function bw7(){ const now = parseD(today()); const xs = bwSeries().filter(p => (now - parseD(p.date))/864e5 < 7).map(p=>p.v); return xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : null; }
+function bwRate(){ // кг в неделю по последним ~3 неделям, линейная регрессия; нужно минимум 10 дней отметок
   const pts = bwSeries().filter(p => (parseD(today()) - parseD(p.date)) / 864e5 <= 21);
-  if (pts.length < 3) return null;
+  if (pts.length < 4 || (parseD(pts[pts.length-1].date) - parseD(pts[0].date))/864e5 < 10) return null;
   const x = pts.map(p => parseD(p.date)/864e5), y = pts.map(p => p.v); const mx = x.reduce((a,b)=>a+b)/x.length, my = y.reduce((a,b)=>a+b)/y.length;
   let n=0,d=0; x.forEach((xi,k)=>{ n+=(xi-mx)*(y[k]-my); d+=(xi-mx)**2; }); if (!d) return null; return n/d*7;
 }
@@ -525,7 +601,7 @@ function hints(){
     const pct = r / w * 100;
     if (p.goal === 'bulk'){ if (r < 0.1) H.push({t:'warn', m:`Вес почти не растёт (${r>=0?'+':''}${kg(r.toFixed(2))} кг/нед). Добавь ~200 ккал в день: стакан молока и горсть арахиса.`}); else if (r > 0.6) H.push({t:'warn', m:`Вес растёт быстро (+${kg(r.toFixed(2))} кг/нед). Больше 0,5 кг в неделю — обычно уже жир. Чуть убавь еду.`}); else H.push({t:'ok', m:`Вес растёт в хорошем темпе: +${kg(r.toFixed(2))} кг в неделю.`}); }
     if (p.goal === 'cut'){ if (pct > -0.25) H.push({t:'warn', m:`Вес почти не уходит. Проверь порции и добавь шагов.`}); else if (pct < -1.1) H.push({t:'warn', m:`Вес уходит слишком быстро (${kg(r.toFixed(2))} кг/нед) — есть риск потерять мышцы. Ешь чуть больше.`}); else H.push({t:'ok', m:`Хороший темп похудения: ${kg(r.toFixed(2))} кг в неделю.`}); }
-  } else H.push({t:'info', m:'Отмечай вес тела хотя бы 3 раза в неделю, утром натощак — тогда появится оценка темпа.'});
+  } else H.push({t:'info', m:'Темп веса появится после 10+ дней отметок. Взвешивайся 3+ раза в неделю утром натощак, после туалета: смотрим среднюю за неделю, а не отдельные дни.'});
   // сон
   const last7 = Object.keys(S.days).filter(k => (parseD(today()) - parseD(k))/864e5 < 7 && S.days[k].sleep != null);
   if (last7.length >= 3){
@@ -536,8 +612,11 @@ function hints(){
     const beds = last7.map(k => S.days[k].bed).filter(x => x != null).map(x => x > 12 ? x - 24 : x);
     if (beds.length >= 4){ const spread = Math.max(...beds) - Math.min(...beds); if (spread >= 3) H.push({t:'info', m:`Время отхода ко сну гуляет на ${Math.round(spread)} ч. Ровный режим (даже поздний) организм переносит легче, чем скачки.`}); }
   }
-  const pd = Object.keys(S.days).filter(k => (parseD(today()) - parseD(k))/864e5 < 7 && S.days[k].protein != null);
-  if (pd.length >= 3){ const yes = pd.filter(k => S.days[k].protein).length; if (yes/pd.length < 0.6) H.push({t:'warn', m:`Белок в норме только ${yes} из ${pd.length} дней. Самое дешёвое: +2-3 яйца и фуль с хлебом.`}); }
+  const pg = Object.keys(S.days).filter(k => (parseD(today()) - parseD(k))/864e5 < 7 && S.days[k].proteinG != null); const tt = targets();
+  if (pg.length >= 3 && tt){ const avg = Math.round(pg.reduce((a,k)=>a+S.days[k].proteinG,0)/pg.length);
+    if (avg < tt.pLo) H.push({t:'warn', m:`Белок в среднем ${avg} г в день, цель ${tt.pLo}-${tt.pHi} г. Не хватает ~${tt.pLo-avg} г: это ${Math.ceil((tt.pLo-avg)/6)} яиц или порция курицы.`}); else H.push({t:'ok', m:`Белок в среднем ${avg} г в день — в норме.`}); }
+  const pd = Object.keys(S.days).filter(k => (parseD(today()) - parseD(k))/864e5 < 7 && S.days[k].protein != null && S.days[k].proteinG == null);
+  if (!pg.length && pd.length >= 3){ const yes = pd.filter(k => S.days[k].protein).length; if (yes/pd.length < 0.6) H.push({t:'warn', m:`Белок в норме только ${yes} из ${pd.length} дней. Самое дешёвое: +2-3 яйца и фуль с хлебом.`}); }
   // регулярность
   const wkS = S.sessions.filter(s => (parseD(today()) - parseD(s.date))/864e5 < 7).length;
   if (S.sessions.length && wkS < 3 && (parseD(today()).getDay() >= 4 || parseD(today()).getDay() === 0)) H.push({t:'info', m:`На этой неделе ${wkS} ${wkS===1?'тренировка':'тренировки'}. Цель — 4.`});
@@ -565,6 +644,7 @@ function exportText(){
   L.push(`ЖУРНАЛ ТРЕНИРОВОК — ${p.name || ''}`);
   L.push(`Профиль: ${p.age} лет, ${p.height} см, вес сейчас ${kg(lastBW())} кг, цель: ${GOALS[p.goal]}. Старт программы: ${p.startDate}, сейчас неделя ${weekNo()}, вариант ${blockName(blockOf(weekNo()))}.`);
   if (t) L.push(`Ориентиры: ~${t.kcal} ккал, белок ${t.pLo}-${t.pHi} г/день.`);
+  const W = bwWeeks(); if (W.length) L.push(`Средний вес по неделям: ${W.slice(-6).map(x=>`${x.date.slice(5)} ${kg(x.v.toFixed(1))}`).join(' → ')} кг.`);
   L.push('');
   const since = S.sessions.filter(s => (parseD(today()) - parseD(s.date))/864e5 <= 28);
   L.push(`ТРЕНИРОВКИ за 4 недели (${since.length}):`);
@@ -574,7 +654,7 @@ function exportText(){
   });
   L.push(''); L.push('ОТМЕТКИ ДНЕЙ (дата: вес, сон, белок, кардио):');
   Object.keys(S.days).sort().filter(k => (parseD(today()) - parseD(k))/864e5 <= 28).forEach(k => { const d = S.days[k];
-    L.push(`${k}: ${d.bw?kg(d.bw)+' кг':'—'}, сон ${d.sleep==null?'—':`ночь ${kg(d.sleep)} ч${d.nap?` + днём ${kg(d.nap)} ч`:''}${d.bed!=null?`, лёг ${BED[d.bed]||d.bed}`:''}`}, белок ${d.protein==null?'—':d.protein?'да':'нет'}, кардио ${d.cardio ? d.cardio+' мин' : '—'}${d.steps?`, шаги ${d.steps}`:''}${d.waist?`, талия ${d.waist} см`:''}`); });
+    L.push(`${k}: ${d.bw?kg(d.bw)+' кг':'—'}, сон ${d.sleep==null?'—':`ночь ${kg(d.sleep)} ч${d.nap?` + днём ${kg(d.nap)} ч`:''}${d.bed!=null?`, лёг ${BED[d.bed]||d.bed}`:''}`}, белок ${d.proteinG!=null ? d.proteinG+' г' : d.protein==null?'—':d.protein?'да':'нет'}, кардио ${d.cardio ? d.cardio+' мин'+(d.cardioMode==='int'?' (интервалы)':'') : '—'}${d.steps?`, шаги ${d.steps}`:''}${d.waist?`, талия ${d.waist} см`:''}`); });
   const h = hints(); if (h.length){ L.push(''); L.push('ПОДСКАЗКИ ПРИЛОЖЕНИЯ:'); h.forEach(x => L.push('• '+x.m)); }
   L.push(''); L.push('Проанализируй, пожалуйста: прогресс по весам, темп веса тела, сон и питание, что поменять.');
   return L.join('\n');
@@ -622,8 +702,6 @@ function vOnboard(edit){
       <button class="btn" type="submit">${edit ? 'Сохранить' : 'Начать'}</button>
     </form>
     ${edit ? `<div class="col g10">
-      <h2 style="margin-top:8px">Тренировка</h2>
-      <button class="li" data-a="togss"><div class="grow"><div style="font-weight:600">Суперсеты</div><div class="prog">${p.noSS ? 'Выключены: все упражнения по очереди, с отдыхом после каждого подхода' : 'Включены: пары упражнений подряд, отдых после пары'}</div></div><span class="badge ${p.noSS?'':'acc'}">${p.noSS?'Выкл':'Вкл'}</span></button>
       <h2 style="margin-top:8px">Данные</h2>
       <button class="btn sec" data-a="copy">${ic('copy')}Скопировать для Claude</button>
       <button class="btn sec" data-a="file">${ic('down')}Сохранить файл-копию</button>
@@ -640,7 +718,7 @@ function vHome(){
   const week = WDS.map((w,k) => { const d = new Date(monday); d.setDate(monday.getDate()+k); const ds = dstr(d); const isT = ds===today();
     return `<div class="wd ${isT?'today':''}">${w}<div class="dot ${done.has(ds)?'done':''} ${isT && !done.has(ds)?'today':''}">${done.has(ds)?ic('check'):''}</div></div>`; }).join('');
   const wk = weekNo(), di = nextDayIdx(), plan = dayPlan(di, wk);
-  const listed = []; plan.forEach(x => { const n = EX[x.key].n; if (x.key==='wrist_curl') listed.push('Предплечья · 2+2'); else if (x.key!=='wrist_ext') listed.push(`${n} · ${x.sets}×${x.lo}-${x.hi}`); });
+  const listed = []; let fa = false; plan.forEach(x => { const n = EX[x.key].n; if (PART_OF[x.key]?.mu === 'forearms'){ if (!fa) listed.push('Предплечья в конце · 2+2'); fa = true; } else listed.push(`${n} · ${x.sets}×${x.lo}-${x.hi}`); });
   const wkCount = S.sessions.filter(s => parseD(s.date) >= parseD(dstr(monday))).length;
   const r = bwRate(); const td = S.days[today()] || {};
   const resume = S.active ? `<button class="card row g12" data-a="go" data-v="workout" style="border:2px solid var(--acc);text-align:left;width:100%">${ic('play','acc')}<div class="grow"><div style="font-weight:700">Тренировка идёт</div><div class="muted s14">День ${S.active.dayIdx+1} · вернуться</div></div>${ic('right')}</button>` : '';
@@ -658,11 +736,11 @@ function vHome(){
       <button class="link" data-a="pickday" style="align-self:center">Другой день</button>
     </div>`}
     <div class="two">
-      <div class="stat"><div class="muted small">Вес тела</div><div class="v num">${kg(lastBW())}<small> кг</small></div><div class="small ${r==null?'muted':'acc'}">${r==null?'мало отметок':(r>=0?'+':'')+kg(r.toFixed(2))+' за неделю'}</div></div>
+      <div class="stat"><div class="muted small">Вес, среднее 7 дн.</div><div class="v num">${kg((bw7() ?? lastBW()).toFixed(1))}<small> кг</small></div><div class="small ${r==null?'muted':'acc'}">${r==null?'темп — после 10 дней':(r>=0?'+':'')+kg(r.toFixed(2))+' за неделю'}</div></div>
       <div class="stat"><div class="muted small">На этой неделе</div><div class="v num">${wkCount}<small> из 4</small></div><div class="small muted">тренировок</div></div>
     </div>
     ${t ? `<div class="card tight row g12">${ic('flame','acc')}<div class="grow s14"><span class="soft">Ориентир на день:</span> <b>~${t.kcal} ккал</b>, белок <b>${t.pLo}-${t.pHi} г</b></div></div>` : ''}
-    ${S.active ? '' : `<button class="card row g12" data-a="go" data-v="cardio" style="text-align:left;width:100%">${ic('heart', td.cardio ? 'acc' : 'muted')}<div class="grow"><div style="font-weight:600">${S.cardioActive ? 'Кардио идёт — вернуться' : 'Кардио'}</div><div class="muted s14">${td.cardio ? `сегодня ${td.cardio} мин` : 'Цель 2-3 раза в неделю по 20-30 мин'}</div></div>${ic('right')}</button>`}
+    ${S.active ? '' : `<button class="card row g12" data-a="go" data-v="cardio" style="text-align:left;width:100%">${ic('heart', td.cardio ? 'acc' : 'muted')}<div class="grow"><div style="font-weight:600">${S.cardioActive ? 'Кардио идёт — вернуться' : 'Кардио'}</div><div class="muted s14">${td.cardio ? `сегодня ${td.cardio} мин · ` : ''}за 7 дней ${cardioWeek().min} из 150 мин</div></div>${ic('right')}</button>`}
     <button class="card row g12" data-a="daymarks" style="text-align:left;width:100%">
       ${ic('check', td.sleep ? 'acc' : 'muted')}<div class="grow"><div style="font-weight:600">Отметки дня</div><div class="muted s14">${td.sleep!=null||td.bw||td.cardio ? `сон ${td.sleep!=null?kg(sleepTotal(td)):'—'} ч · вес ${td.bw?kg(td.bw):'—'} · кардио ${td.cardio?td.cardio+' мин':'—'}` : 'Сон, белок, вес, кардио — 10 секунд'}</div></div>${ic('right')}</button>
     ${nav('home')}
@@ -702,7 +780,7 @@ function vWorkout(){
       <button class="tip" id="rTip" data-a="tipnext" style="display:none;background:transparent;border-color:var(--card2)" aria-label="Следующий совет"></button>
     </div>
     <div class="row g12" style="align-items:flex-start">
-      <div class="col g6 grow"><div class="exname">${ex.n}</div>
+      <div class="col g6 grow">${partLabel(it.key) ? `<div class="label acc">${partLabel(it.key)}</div>` : ''}<div class="exname">${ex.n}</div>
         <div class="s14 muted">Вариант ${blockName(A.block)} · ${it.sets.length} × ${it.lo}-${it.hi} · отдых ${restStr}</div>
         ${partner ? `<div><span class="badge acc">Суперсет с: ${partner}</span></div>` : ''}${ex.m ? '<div><span class="badge">тренажёр</span></div>' : ''}</div>
       <button class="icbtn" style="width:52px;height:52px;border:1px solid var(--line)" data-a="img" aria-label="Показать технику">${ic('img')}</button>
@@ -725,13 +803,26 @@ function vWorkout(){
   </div>`;
 }
 
+// Белок кнопками: дешёвые продукты, граммы белка — средние значения на порцию
+const FOODS = [['Яйцо',6],['Курица 150 г',40],['Молоко, стакан',8],['Фуль, порция',13],['Чечевица, порция',15],['Арахис, горсть',8],['Лепёшка',8],['Другое',5]];
+function proteinField(m){
+  const t = targets(); const g = m.proteinG || 0; const pct = t ? Math.min(100, g / t.pLo * 100) : 0;
+  return `<div class="field"><label>Белок сегодня${t ? ` · цель ${t.pLo}-${t.pHi} г` : ''}</label>
+    <div class="row g10" style="align-items:center"><div class="disp num" style="font-size:30px">${g}<small style="font-size:15px" class="muted"> г</small></div>
+      <div class="grow"><div class="bar" style="height:10px"><div style="height:10px;width:${pct}%;${t&&g>=t.pLo?'':'background:var(--warn)'}"></div></div>
+      <div class="small muted" style="margin-top:4px">${!t ? '' : g >= t.pLo ? 'Норма есть' : `ещё ~${t.pLo-g} г`}</div></div></div>
+    <div class="chips" style="grid-template-columns:1fr 1fr;margin-top:8px">${FOODS.map(([n,v]) => `<button type="button" class="chip" data-a="padd" data-v="${v}" style="font-size:14px">${n} <b>+${v}</b></button>`).join('')}</div>
+    <div class="row g8" style="margin-top:8px"><div class="stepper grow" style="background:var(--card)"><button type="button" data-a="padd" data-v="-5" aria-label="Минус 5 г">−</button><div class="val"><input id="inProt" inputmode="numeric" value="${g}" aria-label="Белок, граммов"><span class="u">г</span></div><button type="button" data-a="padd" data-v="5" aria-label="Плюс 5 г">+</button></div>
+      ${(m.pLog||[]).length ? '<button type="button" class="link" data-a="pundo">отменить</button>' : ''}</div>
+    <div class="small muted" style="margin-top:4px">Можно отмечать в течение дня — граммы складываются.</div></div>`;
+}
 function marksForm(m, withCardio){
   const p = S.profile; const chip = (f,v,t) => `<button type="button" class="chip ${m[f]===v?'on':''}" data-a="mk" data-f="${f}" data-v="${v}">${t}</button>`;
   return `<div class="col g16">
     <div class="field"><label>Ночной сон, часов</label><div class="chips" style="grid-template-columns:repeat(6,1fr)">${[4,5,6,7,8,9].map(v=>chip('sleep',v,v===4?'≤4':v===9?'9+':v)).join('')}</div></div>
     <div class="field"><label>Лёг спать примерно в</label><div class="chips" style="grid-template-columns:repeat(6,1fr)">${[23,0.5,1.5,2.5,3.5,4.5].map(v=>`<button type="button" class="chip ${m.bed===v?'on':''}" data-a="mk" data-f="bed" data-v="${v}" style="font-size:13px">${BED[v]}</button>`).join('')}</div></div>
     <div class="field"><label>Дневной сон</label><div class="chips" style="grid-template-columns:repeat(5,1fr)">${[[0,'Нет'],[0.5,'30 м'],[1,'1 ч'],[1.5,'1,5 ч'],[2,'2 ч']].map(([v,t])=>chip('nap',v,t)).join('')}</div></div>
-    <div class="field"><label>Белок сегодня в норме${targets()?` (${targets().pLo}+ г)`:''}?</label><div class="chips" style="grid-template-columns:1fr 1fr">${chip('protein',true,'Да')}${chip('protein',false,'Нет')}</div></div>
+    ${proteinField(m)}
     <div class="field"><label>Вес тела (утром натощак)</label><div class="stepper" style="background:var(--card)"><button type="button" data-a="bw" data-v="-1" aria-label="Меньше">−</button><div class="val"><input id="inBW" inputmode="decimal" value="${kg(m.bw)}" aria-label="Вес тела"><span class="u">кг</span></div><button type="button" data-a="bw" data-v="1" aria-label="Больше">+</button></div></div>
     ${withCardio ? `<div class="field"><label>Кардио, минут</label>${(() => { const vals = [...new Set([0,15,20,30, ...(m.cardio?[m.cardio]:[])])].sort((x,y)=>x-y); return `<div class="chips" style="grid-template-columns:repeat(${vals.length},1fr)">${vals.map(v=>chip('cardio',v,v||'Нет')).join('')}</div>`; })()}</div>` : ''}
     ${p.goal==='cut' ? `<div class="two"><div class="field"><label for="inSteps">Шаги</label><input id="inSteps" class="inp num" inputmode="numeric" value="${m.steps??''}" placeholder="8000"></div>
@@ -739,6 +830,7 @@ function marksForm(m, withCardio){
   </div>`;
 }
 function readExtraMarks(m){ const bw = $('#inBW'); if (bw){ const v = parseFloat(bw.value.replace(',','.')); if (v>20 && v<400) m.bw = v; }
+  const pg = $('#inProt'); if (pg){ const v = parseInt(pg.value); if (!isNaN(v) && v >= 0 && v < 600) m.proteinG = v; }
   const st = $('#inSteps'); if (st && st.value) m.steps = parseInt(st.value)||undefined; const wa = $('#inWaist'); if (wa && wa.value) m.waist = parseFloat(wa.value.replace(',','.'))||undefined; }
 
 function vFinish(){
@@ -759,25 +851,38 @@ function vFinish(){
 }
 
 function vCardio(){
-  const C = S.cardioActive; const goal = S.profile.goal;
-  const tip = goal === 'cut' ? 'Для похудения: 30-45 минут, 3-4 раза в неделю.' : 'Для набора массы: 20-30 минут, 2-3 раза в неделю, лучше после силовой, но не перед днём ног.';
-  if (!C){ const pick = ui.cardioPick || 'walk', tgt = ui.cardioTarget || (goal==='cut'?40:25);
+  const C = S.cardioActive; const age = S.profile.age || 30;
+  if (!C){ const mode = ui.cMode || 'mod', M = CMODES[mode]; const pick = ui.cardioPick && CSET[ui.cardioPick] && ui.cardioPick !== 'run' ? ui.cardioPick : 'walk'; const val = M.opts.includes(ui.cVal) ? ui.cVal : M.def;
+    const plan = cardioPlan(mode, val); const total = Math.round(plan.reduce((a,x)=>a+x.sec,0)/60); const wk = cardioWeek();
+    const shown = mode==='int' ? ['warm','hard','easy','cool'] : ['warm','mod','cool'];
+    const dur = k => { const xs = plan.filter(x=>x.k===k); return mode==='int' && (k==='hard'||k==='easy') ? `${xs.length} × ${xs[0].sec/60} мин` : `${Math.round(xs.reduce((a,x)=>a+x.sec,0)/60)} мин`; };
     return `<div class="col g16">
       <div class="row g10"><button class="icbtn" data-a="go" data-v="home" aria-label="Назад">${ic('left')}</button><h1 class="grow" style="font-size:24px">Кардио</h1></div>
-      <div class="soft s15">${tip} Темп такой, чтобы можно было говорить, но не петь.</div>
-      <div class="col g8">${Object.entries(CARDIO).map(([k,c]) => `<button class="li ${k===pick?'on':''}" data-a="cpick" data-v="${k}"><div class="thumb"><img src="img/${c.img}_0.jpg" alt=""></div><div class="grow" style="font-weight:600">${c.n}</div>${k===pick?`<span class="ok">${ic('check')}</span>`:''}</button>`).join('')}</div>
-      <div class="field"><label>Цель, минут</label><div class="chips" style="grid-template-columns:repeat(5,1fr)">${[15,20,25,30,45].map(v=>`<button class="chip ${v===tgt?'on':''}" data-a="ctgt" data-v="${v}">${v}</button>`).join('')}</div></div>
-      <button class="btn big" data-a="cstart">${ic('play')}Начать кардио</button>
+      <div class="card tight s14 soft">За 7 дней: <b>${wk.min} мин</b> из 150 (норма ВОЗ для сердца)${wk.int ? ' · интервалы были' : ' · интервалов не было'}</div>
+      <div class="chips" style="grid-template-columns:1fr 1fr">${Object.entries(CMODES).map(([k,x]) => `<button class="chip ${k===mode?'on':''}" data-a="cmode" data-v="${k}" style="font-size:15px">${x.n}</button>`).join('')}</div>
+      <div class="soft s15">${M.d}</div>
+      <div class="col g8">${['walk','bike','ellip'].map(k => { const c = CARDIO[k]; return `<button class="li ${k===pick?'on':''}" data-a="cpick" data-v="${k}"><div class="thumb"><img src="img/${c.img}_0.jpg" alt=""></div><div class="grow" style="font-weight:600">${k==='walk'?'Беговая дорожка':c.n}</div>${k===pick?`<span class="ok">${ic('check')}</span>`:''}</button>`; }).join('')}</div>
+      <div class="field"><label>${mode==='int'?'Сколько быстрых отрезков':'Длительность, минут'}</label><div class="chips" style="grid-template-columns:repeat(${M.opts.length},1fr)">${M.opts.map(v=>`<button class="chip ${v===val?'on':''}" data-a="cval" data-v="${v}">${v}</button>`).join('')}</div>
+        ${mode==='int' ? '<div class="small muted" style="margin-top:4px">Первые 2-3 раза начни с 4.</div>' : ''}</div>
+      <div class="card col g10"><div class="row"><h2 class="grow">План · ${total} мин</h2><div class="small muted">макс. пульс ~${Math.round(hrMax(age))}</div></div>
+        ${shown.map(k => { const [a,b] = hrRange(k, age); return `<div class="col g4" style="padding:8px 0;border-top:1px solid var(--line)"><div class="row"><b class="grow">${CPH[k].n}</b><span class="small muted">${dur(k)}</span></div>
+          <div class="s14 soft">${CSET[pick][k]}</div><div class="small ${k==='hard'?'warn':'acc'}">пульс ${a}-${b} · ${CPH[k].rpe}</div></div>`; }).join('')}
+        <div class="small muted">Цифры тренажёров разные: если пульс или дыхание выше нормы — убавь, ниже — добавь.</div></div>
+      <div class="hint">${ic('heart','warn')}<div class="s14">Боль или давление в груди, сильная одышка, головокружение — сразу остановись. Если повторяется — к врачу.</div></div>
+      <button class="btn big" data-a="cstart">${ic('play')}Начать</button>
     </div>`; }
-  const c = CARDIO[C.type]; const el = (Date.now() - C.startedAt)/1000;
+  const c = CARDIO[C.type] || CARDIO.walk; const el = (Date.now() - C.startedAt)/1000; const cur = phaseAt(C, el);
   return `<div class="col g16">
-    <div class="row g10"><button class="icbtn" data-a="go" data-v="home" aria-label="На главный экран">${ic('x')}</button><div class="col grow"><div class="small muted">Кардио · цель ${C.target} мин</div><div style="font-weight:600">${c.n}</div></div></div>
-    <div class="rest" id="crest" style="align-items:center;padding:28px 16px">
-      <div class="label" id="cL" style="color:var(--muted)">Идёт</div>
-      <div class="t" id="cT" style="font-size:72px">${mmss(el)}</div>
+    <div class="row g10"><button class="icbtn" data-a="go" data-v="home" aria-label="На главный экран">${ic('x')}</button><div class="col grow"><div class="small muted">${CMODES[C.mode||'mod'].n} · ${C.target} мин</div><div style="font-weight:600">${C.type==='walk'?'Беговая дорожка':c.n}</div></div></div>
+    <div class="rest" id="crest" style="align-items:center;padding:22px 16px">
+      <div class="label" id="cL" style="color:var(--acc)">${cur.p ? CPH[cur.p.k].n : 'Цель выполнена'}</div>
+      <div class="t" id="cPT" style="font-size:72px">${mmss(cur.left)}</div>
+      <div class="s15 soft" id="cSet" style="text-align:center"></div>
+      <div class="small acc" id="cHr" style="text-align:center"></div>
       <div class="bar" style="width:100%"><div id="cBar" style="width:${Math.min(100, el/60/C.target*100)}%"></div></div>
-      <div class="small muted" id="cLeft"></div>
+      <div class="row" style="width:100%"><div class="small muted grow">всего <span id="cT">${mmss(el)}</span></div><div class="small muted" id="cLeft"></div></div>
     </div>
+    <div class="small muted" id="cNext" style="text-align:center"></div>
     <button class="tip" id="cTip" data-a="tipnext" aria-label="Следующий совет"></button>
     <button class="btn ghost" data-a="cimg">${ic('img')}${ui.cImg ? 'Скрыть технику' : 'Показать технику'}</button>
     ${ui.cImg ? `<div class="imgbox"><img src="img/${c.img}_0.jpg" alt="${c.n}"><img class="b" src="img/${c.img}_1.jpg" alt=""></div><div class="cue">${c.c}</div>` : ''}
@@ -808,7 +913,7 @@ function vProgress(){
     <h1>Прогресс</h1>
     ${H.length ? `<div class="col g10">${H.map(h => `<div class="hint">${ic(h.t==='ok'?'check':h.t==='warn'?'bulb':'bulb', h.t==='ok'?'acc':h.t==='warn'?'warn':'muted')}<div>${h.m}</div></div>`).join('')}</div>` : ''}
     <div class="card col g10"><div class="row"><h2 class="grow">Вес тела</h2><div class="s14 ${r==null?'muted':'acc'} num">${r==null?'':(r>=0?'+':'')+kg(r.toFixed(2))+' кг/нед'}</div></div>
-      ${lineChart(bws.slice(-40),'кг')}
+      ${(() => { const W = bwWeeks(); return W.length >= 2 ? `${lineChart(W.slice(-16).map(x=>({date:x.date, v:Math.round(x.v*10)/10})),'кг')}<div class="small muted">Средний вес по неделям: ${W.slice(-4).map(x=>kg(x.v.toFixed(1))).join(' → ')} кг</div>` : `${lineChart(bws.slice(-40),'кг')}<div class="small muted">Пока по дням. С 2-й недели график покажет средний вес за неделю — так видно настоящий тренд.</div>`; })()}
       <div class="small muted">${S.profile.goal==='bulk'?'Цель: +0,25-0,5 кг в неделю':S.profile.goal==='cut'?'Цель: −0,5-1% веса в неделю':'Цель: держать вес стабильным'}</div></div>
     <div class="card col g12"><h2>Сила по упражнениям</h2>
       ${keys.length ? `<div class="tabs">${keys.map(k=>`<button class="tab ${k===ui.progEx?'on':''}" data-a="pex" data-v="${k}">${EX[k]?.n||k}</button>`).join('')}</div>
@@ -820,9 +925,11 @@ function vProgress(){
     <div class="card col g10"><h2>Регулярность</h2><svg class="chart" viewBox="0 0 336 100" role="img" aria-label="Тренировок по неделям">${bars}</svg><div class="small muted">Тренировок по неделям, последние 8. Зелёный — 4 и больше.</div></div>
     <div class="two">
       <div class="stat"><div class="small muted">Сон за сутки, 7 дн.</div><div class="v num">${avgS?kg(avgS.toFixed(1)):'—'}<small> ч</small></div><div class="small ${avgS&&avgS<7?'warn':'muted'}">${avgS?(avgS<7?'маловато':'хорошо'):'нет отметок'}</div></div>
-      <div class="stat"><div class="small muted">Белок, 7 дней</div><div class="v num">${pr.length?prY:'—'}<small>${pr.length?' из '+pr.length:''}</small></div><div class="small muted">дней в норме</div></div>
+      ${(() => { const pgD = last7.filter(k=>S.days[k].proteinG!=null); if (pgD.length){ const avg = Math.round(pgD.reduce((a,k)=>a+S.days[k].proteinG,0)/pgD.length); const tt = targets();
+        return `<div class="stat"><div class="small muted">Белок, среднее 7 дн.</div><div class="v num">${avg}<small> г</small></div><div class="small ${tt&&avg<tt.pLo?'warn':'muted'}">цель ${tt?tt.pLo+'-'+tt.pHi:'—'} г</div></div>`; }
+        return `<div class="stat"><div class="small muted">Белок, 7 дней</div><div class="v num">${pr.length?prY:'—'}<small>${pr.length?' из '+pr.length:''}</small></div><div class="small muted">дней в норме</div></div>`; })()}
     </div>
-    <div class="stat"><div class="small muted">Кардио, 7 дней</div><div class="v num">${cardioWk}<small> мин</small></div><div class="small muted">${cardioN} ${cardioN===1?'раз':'раза'} · цель ${S.profile.goal==='cut'?'3-4':'2-3'} раза</div></div>
+    <div class="stat"><div class="small muted">Кардио, 7 дней</div><div class="v num">${cardioWk}<small> мин</small></div><div class="small muted">${cardioN} ${cardioN===1?'раз':'раза'} · для сердца: 150 мин в неделю, из них 1 раз интервалы</div></div>
     ${recent.length ? `<div class="card col g4"><h2 style="margin-bottom:2px">Последние тренировки</h2><div class="small muted" style="margin-bottom:6px">Нажми, чтобы посмотреть или удалить.</div>${recent.map(({s,idx})=>`<button class="exrow" data-a="sess" data-v="${idx}"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} · День ${s.dayIdx+1}</div><div class="small muted">${DAYS[s.dayIdx].name}</div></div><div class="small muted num">${s.minutes} мин · ${s.exercises.reduce((a,e)=>a+e.sets.length,0)} подх.</div>${ic('right','muted')}</button>`).join('')}
       ${S.sessions.length > 6 ? `<button class="link" data-a="allsess" style="align-self:flex-start">${ui.allSess ? 'Свернуть' : `Показать все (${S.sessions.length})`}</button>` : ''}</div>` : ''}
     <div class="col g10"><h2>Отправить Claude на разбор</h2>
@@ -836,22 +943,30 @@ function vProgress(){
 function vProgram(){
   const wk = weekNo(), b = blockOf(wk);
   return `<div class="col g20">
-    <div class="col g6"><h1>Программа</h1><div class="soft s15">Неделя ${wk} · вариант ${blockName(b)}. Каждые 4 недели меняются часть упражнений, базовые остаются. Нажми на упражнение, чтобы увидеть технику или заменить его на тренажёр.</div></div>
+    <div class="col g6"><h1>Программа</h1><div class="soft s15">Неделя ${wk} · вариант ${blockName(b)}. Каждые 4 недели меняются часть упражнений, базовые остаются. Нажми на упражнение: техника и все замены для этой мышцы — по частям и на разных тренажёрах.</div></div>
     ${wk<=2?'<div class="hint">'+ic('bulb','warn')+'<div class="s15">Недели 1-2 — втягивание после перерыва: по 3 подхода, 3-4 повтора в запасе. С 3-й недели — полный объём, 1-2 повтора в запасе.</div></div>':''}
     ${DAYS.map((d,di) => { const plan = dayPlan(di, wk); return `<div class="card col g6">
-      <div class="row g10"><h2 class="grow">День ${di+1} · ${d.name}</h2></div>
-      <div class="col">${plan.map(x => `<button class="exrow" data-a="exinfo" data-v="${x.key}" data-o="${x.orig}"><div class="thumb"><img src="img/${EX[x.key].img}_0.jpg" alt="" loading="lazy"></div><div class="grow"><div style="font-weight:600">${EX[x.key].n}</div><div class="small muted">${x.sets} × ${x.lo}-${x.hi} · отдых ${mmss(EX[x.key].rest)}${x.ss?' · суперсет':''}${x.orig!==x.key?' · <span class="acc">замена</span>':EX[x.key].m?' · тренажёр':''}</div></div></button>`).join('')}</div>
+      <div class="row g10"><h2 class="grow">День ${di+1} · ${d.name}</h2></div>${d.extra?'<div class="small muted">Делай, только если идёшь в зал 5-й раз за неделю.</div>':''}
+      <div class="col">${plan.map(x => `<button class="exrow" data-a="exinfo" data-v="${x.key}" data-o="${x.orig}"><div class="thumb"><img src="img/${EX[x.key].img}_0.jpg" alt="" loading="lazy"></div><div class="grow"><div style="font-weight:600">${EX[x.key].n}</div><div class="small muted">${partLabel(x.key) ? partLabel(x.key)+' · ' : ''}${x.sets} × ${x.lo}-${x.hi} · отдых ${mmss(EX[x.key].rest)}${x.orig!==x.key?' · <span class="acc">замена</span>':EX[x.key].m?' · тренажёр':''}</div></div></button>`).join('')}</div>
       ${S.active?'':`<button class="link" data-a="start" data-v="${di}" style="align-self:flex-start">Начать этот день →</button>`}
     </div>`; }).join('')}
     <div class="card col g8"><h2>Правила</h2><div class="soft s15" style="line-height:1.5">
       • Сделал верхнюю границу повторов во всех подходах — приложение само добавит вес в следующий раз.<br>
-      • Отдых: базовые 2-3 мин, изолирующие и суперсеты 1,5 мин. Меньше минуты не надо.<br>
-      • Кардио 2-3 раза в неделю по 20-30 мин, после силовой, не перед ногами.<br>
+      • Порядок: одна мышца полностью, потом следующая. Сначала тяжёлые базовые, потом изоляция.<br>
+      • Предплечья — в конце тренировки: уставший хват ослабляет тяги и жимы.<br>
+      • Отдых: базовые 2-3 мин, изолирующие 1,5 мин. Меньше минуты не надо.<br>
+      • 5-й день (ноги) — по желанию, когда идёшь в зал 5 раз. Он не сбивает круг дней 1-4.<br>
+      • Кардио для сердца: 2 раза умеренно по 35-40 мин и 1 раз интервалы, после силовой или в отдельный день, не перед ногами.<br>
       • Креатин 3-5 г каждый день, включая дни отдыха.</div></div>
     ${nav('program')}
   </div>`;
 }
 
+function swapList(orig, cur, attrs){
+  const gs = altGroups(orig); if (!gs.length) return '<div class="small muted">Для этого упражнения замен нет.</div>';
+  return gs.map(g => { const ks = g.keys.filter(k => k !== cur); if (!ks.length) return '';
+    return `<div class="label" style="margin-top:6px">${g.name}</div>${ks.map(k => `<button class="li" ${attrs(k)}><div class="thumb"><img src="img/${EX[k].img}_0.jpg" alt="" loading="lazy"></div><div class="grow"><div style="font-weight:600">${EX[k].n}</div><div class="prog">${k===orig?'исходное упражнение':EX[k].m?'тренажёр / блок':'свободный вес'}</div></div></button>`).join('')}`; }).join('');
+}
 function sheetHTML(){
   const sh = ui.sheet; if (!sh) return '';
   let body = '';
@@ -859,9 +974,9 @@ function sheetHTML(){
     body = `<div class="col g10"><h2>Упражнения</h2>${A.items.map((it,k) => { const d = it.sets.filter(x=>x.done).length; return `<button class="li ${k===A.i?'on':''}" data-a="jump" data-v="${k}"><div class="grow"><div style="font-weight:600">${EX[it.key].n}</div><div class="prog">${d}/${it.sets.length} подходов${it.ss?' · суперсет':''}</div></div>${d===it.sets.length?`<span class="ok">${ic('check')}</span>`:''}</button>`; }).join('')}
       <button class="btn sec" data-a="finish" style="margin-top:6px">Завершить тренировку</button>
       <button class="btn ghost" data-a="cancelwo" style="color:var(--bad);border-color:#4a2a26">Отменить тренировку без сохранения</button></div>`; }
-  if (sh.type === 'swap'){ const A = S.active; const it = A.items[A.i]; const orig = it.orig || it.key; const opts = [orig, ...altsFor(orig)].filter(k => k !== it.key);
-    body = `<div class="col g10"><h2>Чем заменить?</h2><div class="small muted">Сейчас: ${EX[it.key].n}. У каждого варианта свои веса и своя история.</div>
-      ${opts.map(k => `<button class="li" data-a="doswap" data-v="${k}"><div class="thumb"><img src="img/${EX[k].img}_0.jpg" alt=""></div><div class="grow"><div style="font-weight:600">${EX[k].n}</div><div class="prog">${k===orig?'исходное упражнение':EX[k].m?'тренажёр / блок':'свободный вес'}</div></div></button>`).join('')}
+  if (sh.type === 'swap'){ const A = S.active; const it = A.items[A.i]; const orig = it.orig || it.key;
+    body = `<div class="col g10"><h2>Чем заменить?</h2><div class="small muted">Сейчас: ${EX[it.key].n}. Сверху — та же часть мышцы, ниже — другие части. У каждого варианта свои веса и своя история.</div>
+      ${swapList(orig, it.key, k => `data-a="doswap" data-v="${k}"`)}
       <button class="chip ${ui.swapRemember?'on':''}" data-a="swaprem" style="font-size:15px">${ui.swapRemember?'✓ ':''}Запомнить замену для следующих тренировок</button></div>`; }
   if (sh.type === 'sess'){ const s = S.sessions[sh.idx]; if (s) body = `<div class="col g12"><h2>${fmtDate(s.date)} · День ${s.dayIdx+1}</h2><div class="small muted">${DAYS[s.dayIdx].name} · ${s.minutes} мин · неделя ${s.week}</div>
       <div class="card col g4" style="padding:6px 14px">${s.exercises.map(e=>`<div class="exrow"><div class="grow"><div style="font-weight:600">${EX[e.key]?.n||e.key}</div><div class="small muted num">${e.sets.map(x=>`${kg(x.w)}×${x.r}`).join(', ')}</div></div></div>`).join('')}</div>
@@ -870,7 +985,7 @@ function sheetHTML(){
   if (sh.type === 'pickday') body = `<div class="col g10"><h2>Какой день делаем?</h2>${DAYS.map((d,k)=>`<button class="li" data-a="start" data-v="${k}"><div class="grow"><div style="font-weight:600">День ${k+1}</div><div class="prog">${d.name}</div></div>${ic('right')}</button>`).join('')}
     <button class="li" data-a="go" data-v="cardio"><div class="grow"><div style="font-weight:600">Кардио</div><div class="prog">Дорожка, велотренажёр, эллипс</div></div>${ic('heart','acc')}</button></div>`;
   if (sh.type === 'exinfo'){ const ex = EX[sh.key]; body = `<div class="col g12"><h2>${ex.n}</h2><div class="imgbox"><img src="img/${ex.img}_0.jpg" alt="${ex.n}, начало"><img class="b" src="img/${ex.img}_1.jpg" alt="${ex.n}, конец"></div><div class="cue">${ex.c}</div>${sh.orig && sh.orig!==sh.key ? `<div class="small muted">Это замена для «${EX[sh.orig].n}».</div><button class="btn ghost" data-a="unswap" data-v="${sh.orig}">Вернуть исходное упражнение</button>` : ''}
-    ${sh.orig ? (() => { const opts = [sh.orig, ...altsFor(sh.orig)].filter(k => k !== sh.key); return opts.length ? `<h2 style="margin-top:6px;font-size:16px">Заменить в программе на:</h2>${opts.map(k => `<button class="li" data-a="progswap" data-v="${k}" data-o="${sh.orig}"><div class="thumb"><img src="img/${EX[k].img}_0.jpg" alt=""></div><div class="grow"><div style="font-weight:600">${EX[k].n}</div><div class="prog">${k===sh.orig?'исходное упражнение':EX[k].m?'тренажёр / блок':'свободный вес'}</div></div></button>`).join('')}` : ''; })() : ''}<div class="small muted">Картинки: открытая база free-exercise-db.</div></div>`; }
+    ${sh.orig ? `<h2 style="margin-top:6px;font-size:16px">Заменить в программе на:</h2>${swapList(sh.orig, sh.key, k => `data-a="progswap" data-v="${k}" data-o="${sh.orig}"`)}` : ''}<div class="small muted">Картинки: открытая база free-exercise-db.</div></div>`; }
   if (sh.type === 'marks'){ body = `<div class="col g16"><h2>Отметки дня · ${fmtDate(today())}</h2>${marksForm(ui.finishMarks, true)}<button class="btn" data-a="savemarks">Сохранить</button></div>`; }
   if (sh.type === 'text') body = `<div class="col g10"><h2>Скопируй текст</h2><div class="small muted">Выдели всё и скопируй, затем вставь в чат проекта.</div><textarea class="inp" style="height:50dvh;padding:12px;font-size:13px" readonly>${esc(sh.text)}</textarea></div>`;
   return `<div class="sheet" data-a="closesheet"><div data-stop="1">${body}</div></div>`;
@@ -933,6 +1048,8 @@ document.addEventListener('click', e => {
     case 'cancelwo': if (confirm('Удалить эту тренировку без сохранения?')){ S.active=null; save(); ui.sheet=null; go('home'); } break;
     case 'finish': finishWorkout(); break;
     case 'mk': { const f = t.dataset.f; let val = v==='true'?true:v==='false'?false:+v; readExtraMarks(ui.finishMarks); ui.finishMarks[f] = ui.finishMarks[f]===val ? undefined : val; render(); break; }
+    case 'padd': { readExtraMarks(ui.finishMarks); const m = ui.finishMarks; m.proteinG = Math.max(0, (m.proteinG||0) + (+v)); if (+v > 0) (m.pLog = m.pLog||[]).push(+v); render(); break; }
+    case 'pundo': { readExtraMarks(ui.finishMarks); const m = ui.finishMarks; const x = (m.pLog||[]).pop(); if (x) m.proteinG = Math.max(0, (m.proteinG||0) - x); render(); break; }
     case 'bw': { readExtraMarks(ui.finishMarks); ui.finishMarks.bw = Math.round((ui.finishMarks.bw + (+v)*0.1)*10)/10; render(); break; }
     case 'savefinish': saveMarks(); S.sessions.push(ui.summary.session); S.active = null; save(); ui.summary=null; toast('Сохранено. Отличная работа!'); go('home'); break;
     case 'daymarks': ui.finishMarks = {bw:lastBW(), ...(S.days[today()]||{})}; ui.sheet={type:'marks'}; render(); break;
@@ -941,9 +1058,11 @@ document.addEventListener('click', e => {
     case 'allsess': ui.allSess = !ui.allSess; render(); break;
     case 'delsess': { const s = S.sessions[+v]; if (s && confirm(`Удалить тренировку ${fmtDate(s.date)} (День ${s.dayIdx+1})? Это нельзя отменить.`)){ S.sessions.splice(+v,1); save(); ui.sheet=null; render(); toast('Тренировка удалена'); } break; }
     case 'cpick': ui.cardioPick = v; render(); break;
-    case 'ctgt': ui.cardioTarget = +v; render(); break;
-    case 'cstart': if (S.active){ toast('Сначала заверши силовую тренировку'); break; } unlockAudio(); S.cardioActive = {type: ui.cardioPick || 'walk', target: ui.cardioTarget || (S.profile.goal==='cut'?40:25), startedAt: Date.now()}; save(); keepAwake(); lastTick=null; ui.sheet=null; render(); break;
-    case 'cfinish': { const C = S.cardioActive; const min = Math.max(1, Math.round((Date.now()-C.startedAt)/60000)); const d = {...(S.days[today()]||{})}; d.cardio = (d.cardio||0) + min; d.cardioType = C.type; S.days[today()] = d; S.cardioActive = null; save(); try { wakeLock && wakeLock.release(); } catch(e){} toast(`Кардио ${min} мин сохранено`); go('home'); break; }
+    case 'cmode': ui.cMode = v; ui.cVal = null; render(); break;
+    case 'cval': ui.cVal = +v; render(); break;
+    case 'cstart': if (S.active){ toast('Сначала заверши силовую тренировку'); break; } unlockAudio(); { const mode = ui.cMode || 'mod', M = CMODES[mode], val = M.opts.includes(ui.cVal) ? ui.cVal : M.def; const type = ui.cardioPick && ui.cardioPick !== 'run' ? ui.cardioPick : 'walk'; const phases = cardioPlan(mode, val);
+      S.cardioActive = {type, mode, phases, target: Math.round(phases.reduce((a,x)=>a+x.sec,0)/60), startedAt: Date.now()}; } save(); keepAwake(); lastTick=null; ui.sheet=null; render(); break;
+    case 'cfinish': { const C = S.cardioActive; const min = Math.max(1, Math.round((Date.now()-C.startedAt)/60000)); const d = {...(S.days[today()]||{})}; d.cardio = (d.cardio||0) + min; d.cardioType = C.type; if (C.mode) d.cardioMode = d.cardioMode === 'int' ? 'int' : C.mode; S.days[today()] = d; S.cardioActive = null; save(); try { wakeLock && wakeLock.release(); } catch(e){} toast(`Кардио ${min} мин сохранено`); go('home'); break; }
     case 'ccancel': if (confirm('Отменить кардио без сохранения?')){ S.cardioActive = null; save(); go('home'); } break;
     case 'tipnext': ui.tipShift = (ui.tipShift||0) + 1; tick(); break;
     case 'cimg': ui.cImg = !ui.cImg; render(); break;
@@ -954,7 +1073,8 @@ document.addEventListener('click', e => {
     case 'reset': if (confirm('Удалить ВСЕ тренировки и отметки? Это нельзя отменить. Сначала лучше сохранить файл-копию.') && confirm('Точно удалить?')){ localStorage.removeItem(KEY); S = {sessions:[], days:{}}; go('onboard'); } break;
   }
 });
-function saveMarks(){ const m = ui.finishMarks; readExtraMarks(m); const d = {...(S.days[today()]||{})}; ['sleep','nap','bed','protein','bw','cardio','cardioType','steps','waist'].forEach(k => { if (m[k] !== undefined) d[k] = m[k]; else delete d[k]; }); S.days[today()] = d; save(); }
+function saveMarks(){ const m = ui.finishMarks; readExtraMarks(m); if (m.proteinG != null){ const t = targets(); m.protein = m.proteinG > 0 ? (t ? m.proteinG >= t.pLo : null) : undefined; if (!m.proteinG){ delete m.proteinG; } }
+  const d = {...(S.days[today()]||{})}; ['sleep','nap','bed','protein','proteinG','bw','cardio','cardioType','cardioMode','steps','waist'].forEach(k => { if (m[k] !== undefined) d[k] = m[k]; else delete d[k]; }); S.days[today()] = d; save(); }
 function finishWorkout(){
   const A = S.active; readInputs();
   const exercises = A.items.map(it => ({key:it.key, sets: it.sets.filter(x=>x.done).map(x=>({w:x.w, r:x.r}))})).filter(e => e.sets.length);
